@@ -31,6 +31,10 @@
   "license": "MIT",
   "scripts": {
     "lint": "node --check src/index.js src/core/*.js",
-    "test": "node --eval \"console.log('No tests yet. Core scaffold ready.')\""
+    "test": "node --eval \"console.log('No tests yet. Core scaffold ready.')\"",
+    "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.js --bundle --format=esm --minify --outfile=dist/graphjs.min.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
   }
 }

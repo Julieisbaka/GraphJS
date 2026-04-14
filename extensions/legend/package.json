@@ -24,6 +24,7 @@
     "graphjs": ">=0.0.1"
   },
   "scripts": {
-    "lint": "node --check index.js"
+    "lint": "node --check index.js",
+    "build": "esbuild index.js --bundle --format=esm --outfile=dist/index.js && esbuild index.js --bundle --format=esm --minify --outfile=dist/index.min.js"
   }
 }
