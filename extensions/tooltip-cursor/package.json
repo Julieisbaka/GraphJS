@@ -1,6 +1,6 @@
 {
   "name": "graphjs-extension-tooltip-cursor",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "First-party tooltip + cursor extension for GraphJS.",
   "type": "module",
   "main": "./index.js",

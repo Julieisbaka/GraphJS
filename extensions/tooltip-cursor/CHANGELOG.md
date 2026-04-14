@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.3] - 2026-04-14
+
+### Changed
+
+- Replaced deprecated `api.state` access with `api.getPluginState()` in `afterRender` and `beforeDestroy` hooks.
+
 ## [0.0.2] - 2026-04-14
 
 ### Added

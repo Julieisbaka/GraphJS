@@ -114,7 +114,7 @@ export const tooltipCursorPlugin = {
   },
   hooks: {
     afterRender(graph, context, options, api) {
-      const state = api.state || {};
+      const state = api.getPluginState() || {};
       if (!options.enabled || !state.active || !state.mouse) {
         return;
       }
@@ -181,7 +181,7 @@ export const tooltipCursorPlugin = {
       ctx.restore();
     },
     beforeDestroy(graph, context, options, api) {
-      const state = api.state || {};
+      const state = api.getPluginState() || {};
       if (state.onMove) {
         graph.canvas.removeEventListener("mousemove", state.onMove);
       }
