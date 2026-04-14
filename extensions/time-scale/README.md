@@ -5,7 +5,7 @@ First-party GraphJS extension for rendering time-formatted x-axis labels.
 ## Usage
 
 ```js
-import { Graph } from "../../graphjs/src/index.js";
+import { Graph } from "../../src/index.js";
 import { timeScalePlugin } from "./index.js";
 
 const graph = new Graph("#graph", {

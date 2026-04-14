@@ -9,7 +9,7 @@ This extension is intentionally separate from GraphJS core. Add it explicitly in
 ## Usage
 
 ```js
-import { Graph } from "../../graphjs/src/index.js";
+import { Graph } from "../../src/index.js";
 import { watermarkPlugin } from "./index.js";
 
 const graph = new Graph("#graph", {

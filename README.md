@@ -15,7 +15,7 @@ See `CHANGELOG.md` for release history.
 
 Copy this folder into your project, or publish and install from npm later.
 
-A simple runnable demo is available at workspace root: `../demo.html`.
+A simple runnable demo is available at workspace root: `./demo.html`.
 
 ## Quick Start
 

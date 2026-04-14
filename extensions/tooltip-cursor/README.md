@@ -5,7 +5,7 @@ First-party GraphJS extension that adds hover tooltips and cursor guide lines.
 ## Usage
 
 ```js
-import { Graph } from "../../graphjs/src/index.js";
+import { Graph } from "../../src/index.js";
 import { tooltipCursorPlugin } from "./index.js";
 
 const graph = new Graph("#graph", {

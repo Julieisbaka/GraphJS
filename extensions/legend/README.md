@@ -5,7 +5,7 @@ First-party GraphJS extension that renders a simple legend panel from visible se
 ## Usage
 
 ```js
-import { Graph } from "../../graphjs/src/index.js";
+import { Graph } from "../../src/index.js";
 import { legendPlugin } from "./index.js";
 
 const graph = new Graph("#graph", {

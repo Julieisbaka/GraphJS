@@ -18,9 +18,9 @@ Current extensions:
 
 Example imports:
 
-- `../extensions/crosshair/index.js`
-- `../extensions/legend/index.js`
-- `../extensions/tooltip-cursor/index.js`
-- `../extensions/pan-zoom/index.js`
-- `../extensions/time-scale/index.js`
-- `../extensions/watermark/index.js`
+- `./extensions/crosshair/index.js`
+- `./extensions/legend/index.js`
+- `./extensions/tooltip-cursor/index.js`
+- `./extensions/pan-zoom/index.js`
+- `./extensions/time-scale/index.js`
+- `./extensions/watermark/index.js`
