@@ -1,0 +1,146 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'extensions/*/package.json'
+
+jobs:
+  release:
+    name: Create releases
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Create releases for updated packages
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+
+            const packages = [
+              {
+                pkgPath:      'package.json',
+                changelogPath: 'CHANGELOG.md',
+                tagPrefix:    'v',
+              },
+              {
+                pkgPath:      'extensions/crosshair/package.json',
+                changelogPath: 'extensions/crosshair/CHANGELOG.md',
+                tagPrefix:    'crosshair-v',
+              },
+              {
+                pkgPath:      'extensions/legend/package.json',
+                changelogPath: 'extensions/legend/CHANGELOG.md',
+                tagPrefix:    'legend-v',
+              },
+              {
+                pkgPath:      'extensions/pan-zoom/package.json',
+                changelogPath: 'extensions/pan-zoom/CHANGELOG.md',
+                tagPrefix:    'pan-zoom-v',
+              },
+              {
+                pkgPath:      'extensions/time-scale/package.json',
+                changelogPath: 'extensions/time-scale/CHANGELOG.md',
+                tagPrefix:    'time-scale-v',
+              },
+              {
+                pkgPath:      'extensions/tooltip-cursor/package.json',
+                changelogPath: 'extensions/tooltip-cursor/CHANGELOG.md',
+                tagPrefix:    'tooltip-cursor-v',
+              },
+              {
+                pkgPath:      'extensions/watermark/package.json',
+                changelogPath: 'extensions/watermark/CHANGELOG.md',
+                tagPrefix:    'watermark-v',
+              },
+            ];
+
+            // Extract the changelog section for a given version.
+            // Looks for "## [X.Y.Z]" headers and returns everything
+            // between that header and the next one.
+            function extractChangelogSection(changelogContent, version) {
+              const escaped = version.replace(/\./g, '\\.');
+              const startRe = new RegExp(`^## \\[${escaped}\\]`, 'm');
+              const start = changelogContent.search(startRe);
+              if (start === -1) return '';
+
+              // Find content after the header line
+              const afterHeader = changelogContent.indexOf('\n', start) + 1;
+              const nextSection = changelogContent.slice(afterHeader).search(/^## \[/m);
+              const end = nextSection === -1
+                ? changelogContent.length
+                : afterHeader + nextSection;
+
+              return changelogContent.slice(afterHeader, end).trim();
+            }
+
+            // Get the list of files changed in this push.
+            // Falls back to all tracked package paths on the very first commit.
+            let changedFiles;
+            try {
+              changedFiles = execSync('git diff --name-only HEAD~1 HEAD', { encoding: 'utf8' })
+                .split('\n')
+                .map(l => l.trim())
+                .filter(Boolean);
+            } catch {
+              changedFiles = packages.map(p => p.pkgPath);
+            }
+
+            for (const pkg of packages) {
+              if (!changedFiles.includes(pkg.pkgPath)) {
+                core.info(`${pkg.pkgPath} unchanged — skipping.`);
+                continue;
+              }
+
+              const pkgData = JSON.parse(fs.readFileSync(pkg.pkgPath, 'utf8'));
+              const { name, version } = pkgData;
+              const tag = `${pkg.tagPrefix}${version}`;
+
+              // Skip if a release for this tag already exists.
+              try {
+                await github.rest.repos.getReleaseByTag({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  tag,
+                });
+                core.info(`Release ${tag} already exists — skipping.`);
+                continue;
+              } catch (err) {
+                if (err.status !== 404) throw err;
+              }
+
+              // Extract release notes from the changelog.
+              let body = '';
+              try {
+                const changelog = fs.readFileSync(pkg.changelogPath, 'utf8');
+                body = extractChangelogSection(changelog, version);
+              } catch {
+                core.warning(`Could not read changelog for ${name}.`);
+              }
+              if (!body) body = `Release ${tag}`;
+
+              await github.rest.repos.createRelease({
+                owner:      context.repo.owner,
+                repo:       context.repo.repo,
+                tag_name:   tag,
+                name:       `${name} ${version}`,
+                body,
+                draft:      false,
+                prerelease: false,
+              });
+
+              core.info(`Created release: ${tag}`);
+            }
