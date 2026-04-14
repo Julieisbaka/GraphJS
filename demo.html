@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GraphJS Simple Demo</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Segoe UI, Arial, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      .wrap {
+        max-width: 920px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      canvas {
+        border: 1px solid #dbe3ef;
+        border-radius: 10px;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>GraphJS Simple Demo</h1>
+      <canvas id="graph"></canvas>
+    </div>
+
+    <script type="module">
+      import { Graph } from "./graphjs/src/index.js";
+
+      const graph = new Graph("#graph", {
+        width: 860,
+        height: 420
+      });
+
+      graph
+        .setData([
+          {
+            id: "series-a",
+            type: "line",
+            color: "#7c3aed",
+            pointRadius: 3,
+            points: [
+              { x: 0, y: 4 },
+              { x: 1, y: 10 },
+              { x: 2, y: 7 },
+              { x: 3, y: 14 },
+              { x: 4, y: 11 }
+            ]
+          }
+        ])
+        .render();
+    </script>
+  </body>
+</html>

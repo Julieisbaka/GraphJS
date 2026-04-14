@@ -1,0 +1,29 @@
+{
+  "name": "graphjs-extension-watermark",
+  "version": "0.0.2",
+  "description": "First-party watermark extension for GraphJS.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "graphjs",
+    "extension",
+    "watermark",
+    "plugin"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "graphjs": ">=0.0.1"
+  },
+  "scripts": {
+    "lint": "node --check index.js"
+  }
+}

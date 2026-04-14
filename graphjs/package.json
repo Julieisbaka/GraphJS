@@ -1,0 +1,36 @@
+{
+  "name": "graphjs",
+  "version": "0.1.4",
+  "description": "A zero-dependency, lightweight JavaScript graphing core with powerful plugin hooks.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./utils": {
+      "types": "./src/index.d.ts",
+      "default": "./src/core/utils.js"
+    }
+  },
+  "files": [
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "graph",
+    "chart",
+    "plugin",
+    "canvas",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "lint": "node --check src/index.js src/core/*.js",
+    "test": "node --eval \"console.log('No tests yet. Core scaffold ready.')\""
+  }
+}

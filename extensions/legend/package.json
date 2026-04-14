@@ -1,0 +1,29 @@
+{
+  "name": "graphjs-extension-legend",
+  "version": "0.0.2",
+  "description": "First-party legend extension for GraphJS.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "graphjs",
+    "extension",
+    "legend",
+    "plugin"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "graphjs": ">=0.0.1"
+  },
+  "scripts": {
+    "lint": "node --check index.js"
+  }
+}
