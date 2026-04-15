@@ -186,13 +186,16 @@ export function decimatePointsStride(points, maxPoints) {
   }
 
   const stride = Math.ceil(points.length / Math.max(1, maxPoints));
+  const last = points[points.length - 1];
   const out = [];
   for (let i = 0; i < points.length; i += stride) {
     out.push(points[i]);
   }
 
-  if (out[out.length - 1] !== points[points.length - 1]) {
-    out.push(points[points.length - 1]);
+  // Ensure the last data point is always represented. Replace the final
+  // strided element rather than appending, so output length never exceeds maxPoints.
+  if (out[out.length - 1] !== last) {
+    out[out.length - 1] = last;
   }
 
   return out;

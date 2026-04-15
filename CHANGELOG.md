@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] - 2026-04-15
+
+### Fixed
+
+- `decimatePointsStride` no longer overshoots `maxPoints`. Previously the last data point was appended unconditionally, producing an output up to `maxPoints + 1` elements long. The last strided element is now replaced with the actual last point when they differ, so the output length is always at most `maxPoints`.
+
+### Optimized
+
+- `drawGrid` now issues a single `ctx.stroke()` for all vertical lines and a single `ctx.stroke()` for all horizontal lines, replacing one draw call per tick line. The axis zero-crossing position now uses `makeLinearScale` consistently with the rest of the render pipeline instead of duplicated inline scale math. Both axis lines are batched into a single path and stroke.
+- `_drawStaticLayer` no longer calls `JSON.stringify` via `makeStaticLayerKey` on frames where dirty flags already mandate regeneration. The key is now computed inside the regeneration block (skipped by short-circuit) and only evaluated on clean frames to detect silent option mutations.
+
+### Tests
+
+- Fixed `await import()` inside non-async test callbacks (`normalizeSeriesData` and `ErrorBoundary` tests) — replaced with static imports at the top of the file.
+- Added three `decimatePointsStride` unit tests: output length never exceeds `maxPoints`, last input point is always preserved, and input is returned unchanged when already within budget.
+
 ## [0.2.2] - 2026-04-15
 
 ### Changed

@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Graph } from "../src/core/Graph.js";
+import { normalizeSeriesData, decimatePointsStride } from "../src/core/utils.js";
+import { ErrorBoundary } from "../src/core/ErrorBoundary.js";
 
 function createCanvasStub() {
   const ctx = {
@@ -139,8 +141,6 @@ test("Graph._getRenderableSeries: unknown sampler method returns series unchange
 });
 
 test("normalizeSeriesData applies options.series defaults to series missing fields", () => {
-  const { normalizeSeriesData } = await import("../src/core/utils.js");
-
   const raw = [{ id: "s1", points: [{ x: 0, y: 1 }] }];
   const defaults = { type: "bar", color: "#ff0000", lineWidth: 3, pointRadius: 5 };
 
@@ -153,8 +153,6 @@ test("normalizeSeriesData applies options.series defaults to series missing fiel
 });
 
 test("normalizeSeriesData: per-series values take precedence over options.series defaults", () => {
-  const { normalizeSeriesData } = await import("../src/core/utils.js");
-
   const raw = [{ id: "s1", type: "scatter", color: "#00ff00", lineWidth: 1, pointRadius: 2, points: [] }];
   const defaults = { type: "bar", color: "#ff0000", lineWidth: 3, pointRadius: 5 };
 
@@ -167,8 +165,6 @@ test("normalizeSeriesData: per-series values take precedence over options.series
 });
 
 test("ErrorBoundary.configure: partial update preserves untouched fields", () => {
-  const { ErrorBoundary } = await import("../src/core/ErrorBoundary.js");
-
   const boundary = new ErrorBoundary({ enabled: false, onError: null });
   const handler = () => {};
 
@@ -181,4 +177,32 @@ test("ErrorBoundary.configure: partial update preserves untouched fields", () =>
   boundary.configure({ enabled: true });
   assert.equal(boundary.enabled, true);
   assert.strictEqual(boundary.onError, handler, "onError should not change when omitted from configure()");
+});
+
+test("decimatePointsStride: output length never exceeds maxPoints", () => {
+  const points = Array.from({ length: 10 }, (_, i) => ({ x: i, y: i }));
+
+  for (const maxPoints of [2, 3, 5, 9]) {
+    const result = decimatePointsStride(points, maxPoints);
+    assert.ok(
+      result.length <= maxPoints,
+      `expected length <= ${maxPoints}, got ${result.length}`
+    );
+  }
+});
+
+test("decimatePointsStride: output always ends with the last input point", () => {
+  const points = Array.from({ length: 10 }, (_, i) => ({ x: i, y: i }));
+  const last = points[points.length - 1];
+
+  for (const maxPoints of [2, 3, 5]) {
+    const result = decimatePointsStride(points, maxPoints);
+    assert.strictEqual(result[result.length - 1], last, `last point must be preserved for maxPoints=${maxPoints}`);
+  }
+});
+
+test("decimatePointsStride: returns input unchanged when points.length <= maxPoints", () => {
+  const points = [{ x: 0, y: 0 }, { x: 1, y: 1 }];
+  assert.strictEqual(decimatePointsStride(points, 5), points);
+  assert.strictEqual(decimatePointsStride(points, 2), points);
 });

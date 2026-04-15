@@ -283,7 +283,6 @@ export class Graph {
 
   _drawStaticLayer(plot, bounds) {
     const dpr = getDevicePixelRatio();
-    const key = makeStaticLayerKey(this.options, plot, bounds);
     const shouldCache = this.options.scalability.layerCaching;
 
     if (!shouldCache) {
@@ -292,7 +291,11 @@ export class Graph {
       return;
     }
 
-    if (!this._staticLayer.canvas || this._staticLayer.key !== key || this._dirty.options || this._dirty.size || this._dirty.data) {
+    // Skip JSON.stringify on frames where dirty flags already mandate regeneration;
+    // only compute the key on clean frames to catch silent option mutations.
+    const dirtyRegen = !this._staticLayer.canvas || this._dirty.options || this._dirty.size || this._dirty.data;
+    if (dirtyRegen || makeStaticLayerKey(this.options, plot, bounds) !== this._staticLayer.key) {
+      const key = makeStaticLayerKey(this.options, plot, bounds);
       const layer = this._createBufferCanvas(this.options.width, this.options.height, dpr);
       this._staticLayer.canvas = layer.canvas;
       this._staticLayer.ctx = layer.ctx;

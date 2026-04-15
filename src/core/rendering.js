@@ -1,4 +1,4 @@
-import { clamp } from "./utils.js";
+import { clamp, makeLinearScale } from "./utils.js";
 
 export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   const points = series.points;
@@ -107,23 +107,18 @@ export function drawGrid(ctx, options, plot, bounds) {
     ctx.strokeStyle = grid.color;
     ctx.lineWidth = grid.lineWidth;
 
+    ctx.beginPath();
     for (let i = 0; i <= grid.xTicks; i += 1) {
-      const t = i / Math.max(1, grid.xTicks);
-      const x = plot.left + t * plot.width;
-      ctx.beginPath();
+      const x = plot.left + (i / Math.max(1, grid.xTicks)) * plot.width;
       ctx.moveTo(x, plot.top);
       ctx.lineTo(x, plot.bottom);
-      ctx.stroke();
     }
-
     for (let i = 0; i <= grid.yTicks; i += 1) {
-      const t = i / Math.max(1, grid.yTicks);
-      const y = plot.bottom - t * plot.height;
-      ctx.beginPath();
+      const y = plot.bottom - (i / Math.max(1, grid.yTicks)) * plot.height;
       ctx.moveTo(plot.left, y);
       ctx.lineTo(plot.right, y);
-      ctx.stroke();
     }
+    ctx.stroke();
 
     ctx.restore();
   }
@@ -133,17 +128,14 @@ export function drawGrid(ctx, options, plot, bounds) {
     ctx.strokeStyle = axes.color;
     ctx.lineWidth = axes.lineWidth;
 
-    const x0 = clamp(0, bounds.xMin, bounds.xMax);
-    const y0 = clamp(0, bounds.yMin, bounds.yMax);
-    const x = plot.left + ((x0 - bounds.xMin) / (bounds.xMax - bounds.xMin)) * plot.width;
-    const y = plot.bottom - ((y0 - bounds.yMin) / (bounds.yMax - bounds.yMin)) * plot.height;
+    const xScale = makeLinearScale(bounds.xMin, bounds.xMax, plot.left, plot.right);
+    const yScale = makeLinearScale(bounds.yMin, bounds.yMax, plot.bottom, plot.top);
+    const x = xScale(clamp(0, bounds.xMin, bounds.xMax));
+    const y = yScale(clamp(0, bounds.yMin, bounds.yMax));
 
     ctx.beginPath();
     ctx.moveTo(plot.left, y);
     ctx.lineTo(plot.right, y);
-    ctx.stroke();
-
-    ctx.beginPath();
     ctx.moveTo(x, plot.top);
     ctx.lineTo(x, plot.bottom);
     ctx.stroke();
