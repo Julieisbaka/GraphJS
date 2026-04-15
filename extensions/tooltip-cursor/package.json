@@ -1,6 +1,6 @@
 {
   "name": "graphjs-extension-tooltip-cursor",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "First-party tooltip + cursor extension for GraphJS.",
   "type": "module",
   "main": "./index.js",
@@ -11,7 +11,7 @@
     "index.js",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE.md"
   ],
   "keywords": [
     "graphjs",
@@ -22,7 +22,7 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "graphjs": ">=0.0.1"
+    "graphjs": ">=0.2.8"
   },
   "scripts": {
     "lint": "node --check index.js",

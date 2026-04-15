@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7] - 2026-04-15
+
+### Changed
+
+- All `graph.render()` calls in commands and pointer event handlers replaced with `api.requestRender()`. This expresses render requests through the plugin API surface rather than directly on the graph object.
+
 ## [0.0.6] - 2026-04-15
 
 ### Changed

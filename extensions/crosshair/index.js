@@ -22,7 +22,7 @@ export const crosshairPlugin = {
         if (typeof payload.enabled === "boolean") {
           options.enabled = payload.enabled;
         }
-        graph.render();
+        api.requestRender();
         return { x: options.x, y: options.y, enabled: options.enabled };
       },
       {

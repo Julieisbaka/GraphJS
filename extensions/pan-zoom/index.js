@@ -50,7 +50,7 @@ export const panZoomPlugin = {
           () => {
             state.view = null;
             api.setState(state);
-            graph.render();
+            api.requestRender();
             return { reset: true };
           },
           {
@@ -67,7 +67,7 @@ export const panZoomPlugin = {
             if (Number.isFinite(payload.zoomStep)) {
               options.zoomStep = clamp(payload.zoomStep, options.minZoomStep, options.maxZoomStep);
             }
-            graph.render();
+            api.requestRender();
             return { enabled: options.enabled, zoomStep: options.zoomStep };
           },
           {
@@ -119,7 +119,7 @@ export const panZoomPlugin = {
 
       state.view = clampBounds(next, state.bounds);
       api.setState(state);
-      graph.render();
+      api.requestRender();
     };
 
     const onDown = (event) => {
@@ -172,7 +172,7 @@ export const panZoomPlugin = {
       state.view = clampBounds(nextView, state.bounds);
       state.lastMouse = mouse;
       api.setState(state);
-      graph.render();
+      api.requestRender();
     };
 
     graph.canvas.addEventListener("wheel", onWheel, { passive: false });

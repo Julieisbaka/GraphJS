@@ -47,7 +47,7 @@ export const timeScalePlugin = {
         if (typeof payload.locale === "string") {
           options.locale = payload.locale;
         }
-        graph.render();
+        api.requestRender();
         return { ticks: options.ticks, enabled: options.enabled, locale: options.locale };
       },
       {

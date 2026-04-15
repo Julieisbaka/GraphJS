@@ -30,7 +30,7 @@ export const legendPlugin = {
         if (typeof payload.position === "string") {
           options.position = payload.position;
         }
-        graph.render();
+        api.requestRender();
         return { enabled: options.enabled, position: options.position };
       },
       {

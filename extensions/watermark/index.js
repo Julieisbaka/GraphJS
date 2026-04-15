@@ -25,7 +25,7 @@ export const watermarkPlugin = {
         if (typeof payload.enabled === "boolean") {
           options.enabled = payload.enabled;
         }
-        graph.render();
+        api.requestRender();
         return { text: options.text, enabled: options.enabled };
       },
       {
@@ -40,7 +40,7 @@ export const watermarkPlugin = {
         return;
       }
 
-      const { width, height } = graph.options;
+      const { width, height } = api.getOptions();
 
       graph.ctx.save();
       graph.ctx.fillStyle = options.color;

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2026-04-15
+
+### Changed
+
+- `graph.render()` calls in the `set` command and `mousemove`/`mouseleave` event handlers replaced with `api.requestRender()`.
+
 ## [0.0.3] - 2026-04-14
 
 ### Changed

@@ -89,7 +89,7 @@ export const tooltipCursorPlugin = {
         if (Number.isFinite(payload.hitRadius)) {
           options.hitRadius = Math.max(1, payload.hitRadius);
         }
-        graph.render();
+        api.requestRender();
         return { enabled: options.enabled, hitRadius: options.hitRadius };
       },
       {
@@ -100,12 +100,12 @@ export const tooltipCursorPlugin = {
 
     const onMove = (event) => {
       api.setState({ mouse: getMousePosition(graph.canvas, event), active: true });
-      graph.render();
+      api.requestRender();
     };
 
     const onLeave = () => {
       api.setState({ mouse: null, active: false, nearest: null });
-      graph.render();
+      api.requestRender();
     };
 
     graph.canvas.addEventListener("mousemove", onMove);
