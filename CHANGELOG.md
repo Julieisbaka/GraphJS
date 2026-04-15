@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.8] - 2026-04-15
+
+### Added
+
+- `api.requestRender()` — requests a render from within a plugin without holding a direct reference to the graph object. Equivalent to `graph.render()` but expressed through the plugin API surface, keeping plugin code decoupled and allowing the host to batch calls in the future.
+- `api.emit(hookName, context)` — allows a plugin to fire a hook on the graph's hook system. Plugins can now trigger custom hooks registered via `api.registerHook()` and have other plugins respond to them without coupling directly to the graph.
+- `api.getOptions()` / `api.setOptions(opts)` — read and write graph options through the plugin API. Replaces the pattern of closing over the `graph` argument passed to `install`.
+- `api.getDomain()` / `api.setDomain(domain)` — read and write the current domain through the plugin API. Particularly useful for plugins that modify the visible range in pointer event handlers.
+- `api.getPlugin(id)` — look up another registered plugin object by id. Enables explicit plugin-to-plugin coordination without importing `Registry` directly.
+
 ## [0.2.7] - 2026-04-15
 
 ### Changed

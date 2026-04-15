@@ -236,6 +236,27 @@ export class PluginHost {
       },
       unregisterCommand(commandName) {
         host.graph.unregisterCommand(commandName);
+      },
+      requestRender() {
+        host.graph.render();
+      },
+      emit(hookName, context = {}) {
+        return host.call(hookName, context);
+      },
+      getOptions() {
+        return host.graph.getOptions();
+      },
+      setOptions(opts) {
+        host.graph.setOptions(opts);
+      },
+      getDomain() {
+        return host.graph.getDomain();
+      },
+      setDomain(domain) {
+        host.graph.setDomain(domain);
+      },
+      getPlugin(id) {
+        return host.registry.getPlugin(id);
       }
     });
   }
