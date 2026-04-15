@@ -150,15 +150,20 @@ jobs:
                 { cwd: pkg.dir }
               );
 
-              // Extract release notes from changelog.
-              let body = '';
+              // Pre-release check + release notes extraction from changelog.
+              let changelog = "";
               try {
-                const changelog = fs.readFileSync(pkg.changelogPath, 'utf8');
-                body = extractChangelogSection(changelog, version);
+                changelog = fs.readFileSync(pkg.changelogPath, 'utf8');
               } catch {
-                core.warning(`Could not read changelog for ${name}.`);
+                throw new Error(`Pre-release check failed: Could not read changelog '${pkg.changelogPath}' for ${name}@${version}.`);
               }
-              if (!body) body = `Release ${tag}`;
+
+              const body = extractChangelogSection(changelog, version);
+              if (!body) {
+                throw new Error(
+                  `Pre-release check failed: Missing changelog section '## [${version}]' in '${pkg.changelogPath}' for ${name}@${version}.`
+                );
+              }
 
               // Create the release.
               const release = await github.rest.repos.createRelease({

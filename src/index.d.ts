@@ -1,5 +1,21 @@
 export type Point = { x: number; y: number };
 
+export type DataBounds = {
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+};
+
+export type PlotLayout = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+};
+
 export type Series = {
   id?: string;
   type?: "line" | string;
@@ -61,6 +77,155 @@ export type PluginCapabilityFlags = {
   needsData?: boolean;
 };
 
+export type GraphCommandMetadata = {
+  description?: string;
+  argsExample?: unknown;
+  [key: string]: unknown;
+};
+
+export type GraphCommandEntry = {
+  name: string;
+  pluginId: string | null;
+  metadata: GraphCommandMetadata;
+};
+
+export type GraphCommandHandler = (payload?: unknown, graph?: Graph) => unknown;
+
+export type PluginCommandHandler = (
+  payload: unknown,
+  graph: Graph,
+  options: Record<string, unknown>,
+  api: PluginApi
+) => unknown;
+
+export type PluginCommandDefinition =
+  | PluginCommandHandler
+  | {
+      handler: PluginCommandHandler;
+      metadata?: GraphCommandMetadata;
+    };
+
+export type PluginCommandMap = Record<string, PluginCommandDefinition>;
+
+export type HookContextBase = {
+  hookName: BuiltinHookName | string;
+  contextVersion: number;
+};
+
+export type BeforeInitHookContext = HookContextBase & {
+  hookName: "beforeInit";
+  options: GraphOptions;
+};
+
+export type AfterInitHookContext = HookContextBase & {
+  hookName: "afterInit";
+  options: GraphOptions;
+};
+
+export type BeforeSetDataHookContext = HookContextBase & {
+  hookName: "beforeSetData";
+  nextData: unknown;
+};
+
+export type AfterSetDataHookContext = HookContextBase & {
+  hookName: "afterSetData";
+  data: Series[];
+};
+
+export type BeforeLayoutHookContext = HookContextBase & {
+  hookName: "beforeLayout";
+  layout: PlotLayout;
+};
+
+export type AfterLayoutHookContext = HookContextBase & {
+  hookName: "afterLayout";
+  layout: PlotLayout;
+  bounds: DataBounds;
+};
+
+export type BeforeRenderHookContext = HookContextBase & {
+  hookName: "beforeRender";
+  layout: PlotLayout;
+  bounds: DataBounds;
+};
+
+export type BeforeDrawSeriesHookContext = HookContextBase & {
+  hookName: "beforeDrawSeries";
+  series: Series;
+  layout: PlotLayout;
+  bounds: DataBounds;
+  xScale: (value: number) => number;
+  yScale: (value: number) => number;
+};
+
+export type AfterDrawSeriesHookContext = HookContextBase & {
+  hookName: "afterDrawSeries";
+  series: Series;
+  layout: PlotLayout;
+  bounds: DataBounds;
+  xScale: (value: number) => number;
+  yScale: (value: number) => number;
+};
+
+export type AfterRenderHookContext = HookContextBase & {
+  hookName: "afterRender";
+  layout: PlotLayout;
+  bounds: DataBounds;
+};
+
+export type BeforeResizeHookContext = HookContextBase & {
+  hookName: "beforeResize";
+  width: number;
+  height: number;
+};
+
+export type AfterResizeHookContext = HookContextBase & {
+  hookName: "afterResize";
+  width: number;
+  height: number;
+  dpr: number;
+};
+
+export type BeforeDestroyHookContext = HookContextBase & {
+  hookName: "beforeDestroy";
+};
+
+export type AfterDestroyHookContext = HookContextBase & {
+  hookName: "afterDestroy";
+};
+
+export type BuiltinHookContextMap = {
+  beforeInit: BeforeInitHookContext;
+  afterInit: AfterInitHookContext;
+  beforeSetData: BeforeSetDataHookContext;
+  afterSetData: AfterSetDataHookContext;
+  beforeLayout: BeforeLayoutHookContext;
+  afterLayout: AfterLayoutHookContext;
+  beforeRender: BeforeRenderHookContext;
+  beforeDrawSeries: BeforeDrawSeriesHookContext;
+  afterDrawSeries: AfterDrawSeriesHookContext;
+  afterRender: AfterRenderHookContext;
+  beforeResize: BeforeResizeHookContext;
+  afterResize: AfterResizeHookContext;
+  beforeDestroy: BeforeDestroyHookContext;
+  afterDestroy: AfterDestroyHookContext;
+};
+
+export type BuiltinHookName = keyof BuiltinHookContextMap;
+
+export type GraphHookContext = BuiltinHookContextMap[BuiltinHookName] | (HookContextBase & Record<string, unknown>);
+
+export type GraphHookHandler<TContext extends GraphHookContext = GraphHookContext> = (
+  graph: Graph,
+  context: TContext,
+  options: Record<string, unknown>,
+  api: PluginApi
+) => unknown;
+
+export type GraphPluginHooks = Partial<{
+  [K in BuiltinHookName]: GraphHookHandler<BuiltinHookContextMap[K]>;
+}> & Record<string, GraphHookHandler>;
+
 export type PluginApi = {
   readonly id: string;
   getPluginState(pluginId?: string): Record<string, unknown> | undefined;
@@ -68,11 +233,11 @@ export type PluginApi = {
   registerHook(hookName: string): void;
   registerCommand(
     commandName: string,
-    handler: (payload?: unknown, graph?: Graph) => unknown,
-    metadata?: Record<string, unknown>
+    handler: GraphCommandHandler,
+    metadata?: GraphCommandMetadata
   ): string;
   unregisterCommand(commandName: string): void;
-  listCommands(): Array<{ name: string; pluginId: string | null; metadata: Record<string, unknown> }>;
+  listCommands(): GraphCommandEntry[];
   executeCommand(commandName: string, payload?: unknown): unknown;
 };
 
@@ -85,24 +250,9 @@ export type GraphPlugin = {
   capabilities?: PluginCapabilityFlags;
   install?: (graph: Graph, options: Record<string, unknown>, api: PluginApi) => void;
   commands?:
-    | Record<
-        string,
-        | ((payload: unknown, graph: Graph, options: Record<string, unknown>, api: PluginApi) => unknown)
-        | {
-            handler: (
-              payload: unknown,
-              graph: Graph,
-              options: Record<string, unknown>,
-              api: PluginApi
-            ) => unknown;
-            metadata?: Record<string, unknown>;
-          }
-      >
-    | ((plugin: GraphPlugin, options: Record<string, unknown>, api: PluginApi) => Record<string, unknown>);
-  hooks?: Record<
-    string,
-    (graph: Graph, context: Record<string, unknown>, options: Record<string, unknown>, api: PluginApi) => unknown
-  >;
+    | PluginCommandMap
+    | ((plugin: GraphPlugin, options: Record<string, unknown>, api: PluginApi) => PluginCommandMap);
+  hooks?: GraphPluginHooks;
 };
 
 export class Registry {
@@ -142,13 +292,13 @@ export class Graph {
 
   registerCommand(
     commandName: string,
-    handler: (payload?: unknown, graph?: Graph) => unknown,
-    metadata?: Record<string, unknown>,
+    handler: GraphCommandHandler,
+    metadata?: GraphCommandMetadata,
     pluginId?: string | null
   ): string;
   unregisterCommand(commandName: string): void;
   clearPluginCommands(pluginId: string): void;
-  listCommands(): Array<{ name: string; pluginId: string | null; metadata: Record<string, unknown> }>;
+  listCommands(): GraphCommandEntry[];
   executeCommand(commandName: string, payload?: unknown): unknown;
 }
 
@@ -160,12 +310,7 @@ export function decimatePointsStride<T>(points: T[], maxPoints: number): T[];
 export function resolveCanvas(target: string | HTMLCanvasElement): HTMLCanvasElement;
 export function getDevicePixelRatio(): number;
 export function normalizeSeriesData(rawData: Array<Partial<Series>>): Series[];
-export function getDataBounds(seriesList: Array<{ points: Point[] }>): {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
-};
+export function getDataBounds(seriesList: Array<{ points: Point[] }>): DataBounds;
 
 export const DEFAULT_OPTIONS: Readonly<GraphOptions>;
 export function validateDomain(domain: DomainOverride): void;
