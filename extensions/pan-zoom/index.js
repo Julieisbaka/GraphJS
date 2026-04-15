@@ -52,7 +52,7 @@ export const panZoomPlugin = {
     minSpanY: 0.0001
   },
   install(graph, options, api) {
-    const state = api.state || {};
+    const state = api.getPluginState() || {};
         api.registerCommand(
           "resetView",
           () => {
@@ -215,7 +215,7 @@ export const panZoomPlugin = {
   },
   hooks: {
     afterLayout(graph, context, options, api) {
-      const state = api.state || {};
+      const state = api.getPluginState() || {};
       state.layout = context.layout;
       state.bounds = context.bounds;
       ensureView(state, context.bounds);
@@ -226,7 +226,7 @@ export const panZoomPlugin = {
         return;
       }
 
-      const state = api.state || {};
+      const state = api.getPluginState() || {};
       ensureView(state, context.bounds);
       context.bounds.xMin = state.view.xMin;
       context.bounds.xMax = state.view.xMax;
@@ -234,12 +234,12 @@ export const panZoomPlugin = {
       context.bounds.yMax = state.view.yMax;
     },
     beforeSetData(graph, context, options, api) {
-      const state = api.state || {};
+      const state = api.getPluginState() || {};
       state.view = null;
       api.setState(state);
     },
     beforeDestroy(graph, context, options, api) {
-      const state = api.state || {};
+      const state = api.getPluginState() || {};
       if (state.onWheel) {
         graph.canvas.removeEventListener("wheel", state.onWheel);
       }
