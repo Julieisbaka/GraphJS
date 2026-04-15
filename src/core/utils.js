@@ -197,3 +197,87 @@ export function decimatePointsStride(points, maxPoints) {
 
   return out;
 }
+
+/**
+ * Returns a linear scale function mapping a domain range to a pixel range.
+ *
+ * @param {number} domainMin - Input domain minimum.
+ * @param {number} domainMax - Input domain maximum.
+ * @param {number} rangeMin - Output range minimum (pixels).
+ * @param {number} rangeMax - Output range maximum (pixels).
+ * @returns {(value: number) => number} Scale function.
+ */
+export function makeLinearScale(domainMin, domainMax, rangeMin, rangeMax) {
+  const domainSpan = domainMax - domainMin;
+  const rangeSpan = rangeMax - rangeMin;
+  return (value) => rangeMin + ((value - domainMin) / domainSpan) * rangeSpan;
+}
+
+/**
+ * Inverts a linear scale: converts a pixel coordinate back to a domain value.
+ *
+ * @param {number} px - Pixel coordinate to invert.
+ * @param {number} domainMin - Input domain minimum.
+ * @param {number} domainMax - Input domain maximum.
+ * @param {number} rangeMin - Output range minimum (pixels).
+ * @param {number} rangeMax - Output range maximum (pixels).
+ * @returns {number} Domain value.
+ */
+export function invertLinearScale(px, domainMin, domainMax, rangeMin, rangeMax) {
+  const domainSpan = domainMax - domainMin;
+  const rangeSpan = rangeMax - rangeMin;
+  return domainMin + ((px - rangeMin) / rangeSpan) * domainSpan;
+}
+
+/**
+ * Clamps a viewport DataBounds to stay within a full DataBounds,
+ * preserving the viewport's span.
+ *
+ * @param {{xMin:number,xMax:number,yMin:number,yMax:number}} view - Viewport bounds.
+ * @param {{xMin:number,xMax:number,yMin:number,yMax:number}} full - Full data bounds.
+ * @returns {{xMin:number,xMax:number,yMin:number,yMax:number}} Clamped viewport.
+ */
+export function clampBounds(view, full) {
+  const spanX = view.xMax - view.xMin;
+  const spanY = view.yMax - view.yMin;
+  const maxOffsetX = Math.max(0, full.xMax - full.xMin - spanX);
+  const maxOffsetY = Math.max(0, full.yMax - full.yMin - spanY);
+  const offsetX = Math.max(0, Math.min(view.xMin - full.xMin, maxOffsetX));
+  const offsetY = Math.max(0, Math.min(view.yMin - full.yMin, maxOffsetY));
+  return {
+    xMin: full.xMin + offsetX,
+    xMax: full.xMin + offsetX + spanX,
+    yMin: full.yMin + offsetY,
+    yMax: full.yMin + offsetY + spanY
+  };
+}
+
+/**
+ * Applies a partial domain override on top of data bounds.
+ * Only finite values in the domain object are applied.
+ *
+ * @param {{xMin:number,xMax:number,yMin:number,yMax:number}} dataBounds - Computed data bounds.
+ * @param {{xMin?:number,xMax?:number,yMin?:number,yMax?:number}|null} domain - Domain override or null.
+ * @returns {{xMin:number,xMax:number,yMin:number,yMax:number}} Resolved bounds.
+ */
+export function applyDomainOverride(dataBounds, domain) {
+  if (!domain) {
+    return { ...dataBounds };
+  }
+  const resolved = { ...dataBounds };
+  if (Number.isFinite(domain.xMin)) resolved.xMin = domain.xMin;
+  if (Number.isFinite(domain.xMax)) resolved.xMax = domain.xMax;
+  if (Number.isFinite(domain.yMin)) resolved.yMin = domain.yMin;
+  if (Number.isFinite(domain.yMax)) resolved.yMax = domain.yMax;
+  return resolved;
+}
+
+/**
+ * Filters a series list to only visible series.
+ *
+ * @param {Array<{visible:boolean}>} seriesList - Full series list.
+ * @returns {Array<{visible:boolean}>} Visible series only.
+ */
+export function filterVisibleSeries(seriesList) {
+  return seriesList.filter((s) => s.visible);
+}

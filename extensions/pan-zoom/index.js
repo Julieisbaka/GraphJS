@@ -1,14 +1,4 @@
-/**
- * Clamps a numeric value between a minimum and maximum bound.
- *
- * @param {number} value - Input value.
- * @param {number} min - Lower bound.
- * @param {number} max - Upper bound.
- * @returns {number} Clamped number.
- */
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
+import { clampBounds } from "graphjs/utils";
 
 /**
  * Computes local canvas coordinates for a pointer event.
@@ -127,22 +117,7 @@ export const panZoomPlugin = {
         yMax: anchorY + nextSpanY * (1 - my)
       };
 
-      const full = state.bounds;
-      const fullSpanX = full.xMax - full.xMin;
-      const fullSpanY = full.yMax - full.yMin;
-      const maxOffsetX = Math.max(0, fullSpanX - nextSpanX);
-      const maxOffsetY = Math.max(0, fullSpanY - nextSpanY);
-
-      const offsetX = clamp(next.xMin - full.xMin, 0, maxOffsetX);
-      const offsetY = clamp(next.yMin - full.yMin, 0, maxOffsetY);
-
-      state.view = {
-        xMin: full.xMin + offsetX,
-        xMax: full.xMin + offsetX + nextSpanX,
-        yMin: full.yMin + offsetY,
-        yMax: full.yMin + offsetY + nextSpanY
-      };
-
+      state.view = clampBounds(next, state.bounds);
       api.setState(state);
       graph.render();
     };
@@ -187,22 +162,14 @@ export const panZoomPlugin = {
       const dDomainX = -(dx / state.layout.width) * spanX;
       const dDomainY = (dy / state.layout.height) * spanY;
 
-      const full = state.bounds;
-      const nextSpanX = spanX;
-      const nextSpanY = spanY;
-      const maxOffsetX = Math.max(0, full.xMax - full.xMin - nextSpanX);
-      const maxOffsetY = Math.max(0, full.yMax - full.yMin - nextSpanY);
-
-      const offsetX = clamp(state.view.xMin + dDomainX - full.xMin, 0, maxOffsetX);
-      const offsetY = clamp(state.view.yMin + dDomainY - full.yMin, 0, maxOffsetY);
-
-      state.view = {
-        xMin: full.xMin + offsetX,
-        xMax: full.xMin + offsetX + nextSpanX,
-        yMin: full.yMin + offsetY,
-        yMax: full.yMin + offsetY + nextSpanY
+      const nextView = {
+        xMin: state.view.xMin + dDomainX,
+        xMax: state.view.xMax + dDomainX,
+        yMin: state.view.yMin + dDomainY,
+        yMax: state.view.yMax + dDomainY
       };
 
+      state.view = clampBounds(nextView, state.bounds);
       state.lastMouse = mouse;
       api.setState(state);
       graph.render();

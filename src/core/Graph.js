@@ -3,12 +3,15 @@ import { Registry } from "./Registry.js";
 import { PluginHost } from "./PluginHost.js";
 import { HookRegistry } from "./hooks.js";
 import {
+  applyDomainOverride,
   clamp,
   decimatePointsStride,
   deepFreeze,
   deepMerge,
+  filterVisibleSeries,
   getDataBounds,
   getDevicePixelRatio,
+  makeLinearScale,
   normalizeSeriesData,
   resolveCanvas
 } from "./utils.js";
@@ -294,26 +297,7 @@ export class Graph {
     if (this._boundsStrategy) {
       return this._boundsStrategy(dataBounds, this.options);
     }
-
-    const domain = this.options.domain;
-    if (!domain) {
-      return { ...dataBounds };
-    }
-
-    const resolved = { ...dataBounds };
-    if (Number.isFinite(domain.xMin)) {
-      resolved.xMin = domain.xMin;
-    }
-    if (Number.isFinite(domain.xMax)) {
-      resolved.xMax = domain.xMax;
-    }
-    if (Number.isFinite(domain.yMin)) {
-      resolved.yMin = domain.yMin;
-    }
-    if (Number.isFinite(domain.yMax)) {
-      resolved.yMax = domain.yMax;
-    }
-
+    const resolved = applyDomainOverride(dataBounds, this.options.domain);
     validateDomain(resolved);
     return resolved;
   }
@@ -467,13 +451,11 @@ export class Graph {
     }
 
     const plot = payload.layout;
-    const rawBounds = getDataBounds(this.data.filter((s) => s.visible));
+    const rawBounds = getDataBounds(filterVisibleSeries(this.data));
     const bounds = this._resolveBounds(rawBounds);
 
-    const xScale = (value) =>
-      plot.left + ((value - bounds.xMin) / (bounds.xMax - bounds.xMin)) * plot.width;
-    const yScale = (value) =>
-      plot.bottom - ((value - bounds.yMin) / (bounds.yMax - bounds.yMin)) * plot.height;
+    const xScale = makeLinearScale(bounds.xMin, bounds.xMax, plot.left, plot.right);
+    const yScale = makeLinearScale(bounds.yMin, bounds.yMax, plot.bottom, plot.top);
 
     this.plugins.call("afterLayout", { layout: plot, bounds });
     if (this.plugins.call("beforeRender", { layout: plot, bounds }) === false) {

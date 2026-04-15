@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8] - 2026-04-15
+
+### Added
+
+- `makeLinearScale(domainMin, domainMax, rangeMin, rangeMax)` — returns a linear scale function. Used internally for `xScale`/`yScale` in `render()` and available to extension authors writing custom renderers.
+- `invertLinearScale(px, domainMin, domainMax, rangeMin, rangeMax)` — inverts a linear scale from pixel back to domain value.
+- `clampBounds(view, full)` — clamps a viewport `DataBounds` within a full `DataBounds` while preserving the viewport span.
+- `applyDomainOverride(dataBounds, domain)` — applies a partial domain override onto data bounds. Extracted from `Graph._resolveBounds` and now a public utility.
+- `filterVisibleSeries(seriesList)` — filters a series list to visible-only entries. Used internally in `render()`.
+
+### Changed
+
+- `Graph._resolveBounds` now delegates to `applyDomainOverride` internally.
+- `render()` now uses `makeLinearScale` and `filterVisibleSeries` internally, reducing inline code.
+
 ## [0.1.7] - 2026-04-15
 
 ### Fixed

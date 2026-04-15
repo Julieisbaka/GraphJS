@@ -331,6 +331,11 @@ export function resolveCanvas(target: string | HTMLCanvasElement): HTMLCanvasEle
 export function getDevicePixelRatio(): number;
 export function normalizeSeriesData(rawData: Array<Partial<Series>>): Series[];
 export function getDataBounds(seriesList: Array<{ points: Point[] }>): DataBounds;
+export function makeLinearScale(domainMin: number, domainMax: number, rangeMin: number, rangeMax: number): (value: number) => number;
+export function invertLinearScale(px: number, domainMin: number, domainMax: number, rangeMin: number, rangeMax: number): number;
+export function clampBounds(view: DataBounds, full: DataBounds): DataBounds;
+export function applyDomainOverride(dataBounds: DataBounds, domain: DomainOverride): DataBounds;
+export function filterVisibleSeries<T extends { visible: boolean }>(seriesList: T[]): T[];
 export function drawLineSeries(
   ctx: CanvasRenderingContext2D,
   plot: PlotLayout,

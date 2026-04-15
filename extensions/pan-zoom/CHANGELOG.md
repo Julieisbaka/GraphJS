@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5] - 2026-04-15
+
+### Changed
+
+- Replaced duplicated inline clamp-to-bounds logic in wheel zoom and drag-pan handlers with `clampBounds` from `graphjs/utils`. Removes the local `clamp` helper and ~20 lines of duplicated code.
+
 ## [0.0.4] - 2026-04-15
 
 ### Changed
