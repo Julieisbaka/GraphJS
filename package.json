@@ -1,6 +1,6 @@
 {
   "name": "graphjs",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A zero-dependency, lightweight JavaScript graphing core with powerful plugin hooks.",
   "type": "module",
   "main": "./src/index.js",
@@ -35,7 +35,7 @@
   "scripts": {
     "lint": "node --check src/index.js src/core/*.js",
     "test": "node --test \"test/*.test.js\"",
-    "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.prod.js --bundle --format=esm --minify --define:process.env.NODE_ENV='\"production\"' --outfile=dist/graphjs.min.js"
+    "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.prod.js --bundle --format=esm --minify --define:IS_DEV=false --outfile=dist/graphjs.min.js"
   },
   "devDependencies": {
     "c8": "^10.1.3",

@@ -2,7 +2,7 @@ import { deepMerge } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 
-const IS_DEV = process.env.NODE_ENV !== "production";
+const IS_DEV = true; // replaced with false at build time via --define:IS_DEV=false
 
 function getPluginPriority(plugin) {
   return Number.isFinite(plugin.priority) ? plugin.priority : 0;

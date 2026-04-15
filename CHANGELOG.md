@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.5] - 2026-04-15
+## [0.2.6] - 2026-04-15
 
 ### Added
 
@@ -10,9 +10,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- All `validateGraphOptions`, `validateDomain`, and `validatePluginContract` calls are now guarded by `IS_DEV = process.env.NODE_ENV !== "production"`. The production build passes `--define:process.env.NODE_ENV='"production"'` to esbuild, which statically evaluates `IS_DEV` to `false`, removes all `if (false)` validation blocks as dead code, and drops the unused imports — so `validation.js` is completely absent from `dist/graphjs.min.js`. The previous `src/index.prod.js` approach alone saved only ~0.3 KB because the internal imports still pulled validation in; this change eliminates the root cause.
+- All `validateGraphOptions`, `validateDomain`, and `validatePluginContract` calls are now guarded by `IS_DEV`, a top-level constant defaulting to `true`. The production build passes `--define:IS_DEV=false` to esbuild, which folds `if (false)` blocks as dead code and drops the now-unreferenced imports — so `validation.js` is completely absent from `dist/graphjs.min.js`. A `process.env.NODE_ENV` approach was tried first but failed due to shell quoting issues in PowerShell npm scripts; the plain boolean define is cross-platform and quoting-free.
 
-## [0.2.4] - 2026-04-15
+## [0.2.5] - 2026-04-15
 
 ### Changed
 

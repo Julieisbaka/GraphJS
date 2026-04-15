@@ -24,7 +24,7 @@ import {
 } from "./utils.js";
 import { validateDomain, validateGraphOptions } from "./validation.js";
 
-const IS_DEV = process.env.NODE_ENV !== "production";
+const IS_DEV = true; // replaced with false at build time via --define:IS_DEV=false
 
 export { drawLineSeries } from "./rendering.js";
 
