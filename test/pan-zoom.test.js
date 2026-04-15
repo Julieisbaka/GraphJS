@@ -33,6 +33,9 @@ function createPanZoomHarness() {
     registerCommand(commandName, handler) {
       registeredCommands.set(commandName, handler);
       return `pan-zoom.${commandName}`;
+    },
+    requestRender() {
+      graph.render();
     }
   };
 
