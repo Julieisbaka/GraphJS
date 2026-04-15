@@ -18,8 +18,12 @@ export class ErrorBoundary {
     this.onError = settings.onError ?? null;
   }
   configure(settings = {}) {
-    this.enabled = settings.enabled !== false;
-    this.onError = settings.onError ?? null;
+    if ("enabled" in settings) {
+      this.enabled = settings.enabled !== false;
+    }
+    if ("onError" in settings) {
+      this.onError = settings.onError ?? null;
+    }
   }
 
 

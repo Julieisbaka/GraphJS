@@ -115,6 +115,10 @@ export class PluginHost {
     this._errorBoundary = new ErrorBoundary(graph.options?.pluginErrorBoundary ?? {});
   }
 
+  configureErrorBoundary(settings) {
+    this._errorBoundary.configure(settings);
+  }
+
   _handlePluginError(plugin, phase, error, context = {}) {
     this._errorBoundary.handle(plugin.id, phase, error, context);
   }

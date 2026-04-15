@@ -69,6 +69,9 @@ export function createBufferCanvas(options, width, height, dpr) {
   if (useOffscreen) {
     const canvas = new OffscreenCanvas(w, h);
     const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return { canvas: null, ctx: null };
+    }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     return { canvas, ctx };
   }
@@ -78,6 +81,9 @@ export function createBufferCanvas(options, width, height, dpr) {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return { canvas: null, ctx: null };
+    }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     return { canvas, ctx };
   }

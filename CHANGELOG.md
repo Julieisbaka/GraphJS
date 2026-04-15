@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2026-04-15
+
+### Fixed
+
+- `createBufferCanvas` now guards against `getContext("2d")` returning `null` (which browsers may do when the canvas limit is exceeded or hardware acceleration is unavailable). Both the `OffscreenCanvas` and `document.createElement` paths return `{ canvas: null, ctx: null }` instead of throwing a `TypeError` on `setTransform`.
+- `validateGraphOptions` now rejects `options.sampling.method` values that contain leading or trailing whitespace, preventing hard-to-debug mismatches against the sampler registry where `"stride"` and `" stride"` would silently diverge.
+- `validateGraphOptions` now validates `options.series` when present: must be a plain object, and each field (`type`, `color`, `lineWidth`, `pointRadius`) is individually type-checked so invalid values are caught at configuration time rather than silently ignored during render.
+- `Graph.registerSampler` now stores the sampler under the trimmed name. `_getRenderableSeries` also trims `sampling.method` before the registry lookup so a method value with incidental whitespace can still resolve correctly.
+- `ErrorBoundary.configure` now performs a partial update — only fields that are explicitly present in the settings object are applied. Previously, omitting `enabled` would reset it to `true` even if the boundary had been intentionally disabled.
+- `Graph.setOptions` now applies `pluginErrorBoundary` reconfiguration **before** calling `plugins.configure(...)`. This means any errors thrown during plugin install or reconfigure are handled by the updated boundary settings rather than the stale ones.
+- `PluginHost` exposes a `configureErrorBoundary(settings)` helper so `Graph.setOptions` no longer reaches into `this.plugins._errorBoundary` directly.
+
+### Tests
+
+- Added focused unit tests in `test/graph-core.test.js` covering: registered sampler selection, unknown sampler method falling back gracefully, sampler name trimming on registration, `options.series` defaults applied via `normalizeSeriesData`, per-series values taking precedence over defaults, and `ErrorBoundary.configure` partial-update behaviour.
+
 ## [0.2.0] - 2026-04-15
 
 ### 0.2 overall (since 0.1.x)

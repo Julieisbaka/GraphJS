@@ -56,7 +56,7 @@ export class Graph {
     if (typeof fn !== "function") {
       throw new Error(`Sampler '${name}' must be a function.`);
     }
-    Graph.samplers.set(name, fn);
+    Graph.samplers.set(name.trim(), fn);
   }
 
   constructor(canvasTarget, options = {}) {
@@ -102,12 +102,12 @@ export class Graph {
     }
     validateGraphOptions(this.options);
 
-    if (Array.isArray(nextOptions.plugins)) {
-      this.plugins.configure(nextOptions.plugins);
+    if ("pluginErrorBoundary" in nextOptions) {
+      this.plugins.configureErrorBoundary(this.options.pluginErrorBoundary);
     }
 
-    if ("pluginErrorBoundary" in nextOptions) {
-      this.plugins._errorBoundary.configure(this.options.pluginErrorBoundary);
+    if (Array.isArray(nextOptions.plugins)) {
+      this.plugins.configure(nextOptions.plugins);
     }
 
     this._dirty.options = true;
@@ -262,7 +262,7 @@ export class Graph {
       return series;
     }
 
-    const sampler = Graph.samplers.get(sampling.method);
+    const sampler = Graph.samplers.get(sampling.method.trim());
     if (sampler) {
       return { ...series, points: sampler(series.points, sampling.maxPoints) };
     }

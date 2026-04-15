@@ -48,6 +48,23 @@ export function validateGraphOptions(options) {
   assert(typeof options.sampling.enabled === "boolean", "options.sampling.enabled must be a boolean.");
   assert(Number.isInteger(options.sampling.maxPoints) && options.sampling.maxPoints >= 2, "options.sampling.maxPoints must be an integer >= 2.");
   assert(typeof options.sampling.method === "string" && options.sampling.method.trim().length > 0, "options.sampling.method must be a non-empty string.");
+  assert(options.sampling.method === options.sampling.method.trim(), "options.sampling.method must not contain leading or trailing whitespace.");
+
+  if (options.series != null) {
+    assert(typeof options.series === "object" && !Array.isArray(options.series), "options.series must be a plain object.");
+    if (options.series.type != null) {
+      assert(typeof options.series.type === "string" && options.series.type.trim().length > 0, "options.series.type must be a non-empty string.");
+    }
+    if (options.series.color != null) {
+      assert(typeof options.series.color === "string" && options.series.color.length > 0, "options.series.color must be a non-empty string.");
+    }
+    if (options.series.lineWidth != null) {
+      assert(isFiniteNumber(options.series.lineWidth) && options.series.lineWidth > 0, "options.series.lineWidth must be a positive number.");
+    }
+    if (options.series.pointRadius != null) {
+      assert(isFiniteNumber(options.series.pointRadius) && options.series.pointRadius >= 0, "options.series.pointRadius must be a non-negative number.");
+    }
+  }
 
   assert(typeof options.scalability === "object", "options.scalability must be an object.");
   for (const key of ["dirtyRender", "layerCaching", "useOffscreenCanvas"]) {
