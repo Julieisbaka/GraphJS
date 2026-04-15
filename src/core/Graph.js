@@ -122,6 +122,9 @@ export class Graph {
 
   setOptions(nextOptions = {}) {
     this.options = deepMerge(this.options, nextOptions);
+    if ("domain" in nextOptions) {
+      this.options.domain = nextOptions.domain ?? null;
+    }
     validateGraphOptions(this.options);
 
     if (Array.isArray(nextOptions.plugins)) {
@@ -147,7 +150,7 @@ export class Graph {
 
   setDomain(domain = null) {
     validateDomain(domain);
-    this.options = deepMerge(this.options, { domain });
+    this.options.domain = domain;
     this._dirty.options = true;
     this._dirty.render = true;
     return this;

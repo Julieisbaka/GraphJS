@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7] - 2026-04-15
+
+### Fixed
+
+- `graph.setDomain()` now replaces the stored domain object instead of deep-merging with the previous one. Calling `setDomain({ xMin: 10, xMax: 20 })` after a full domain no longer retains stale `yMin`/`yMax` values from the prior call.
+- `graph.setOptions({ domain: ... })` now also replaces the stored domain rather than merging with the previous one, consistent with `setDomain()`.
+
 ## [0.1.6] - 2026-04-15
 
 ### Added
