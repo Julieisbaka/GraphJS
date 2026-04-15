@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-04-15
+
+### 0.2 overall (since 0.1.x)
+
+- **Plugin architecture matured**: plugin APIs were cleaned up (deprecated state getter and flat hooks removed), error handling was extracted into a standalone `ErrorBoundary`, and live error-boundary reconfiguration is now supported.
+- **Extensibility increased**: custom series rendering and data sampling now use registries (`Graph.renderers` and `Graph.samplers`) so extensions can add capabilities without patching core internals.
+- **Bounds and domain behavior hardened**: domain updates now replace prior state predictably, bounds resolution is strategy-driven, and related helpers were extracted to reusable utilities.
+- **Core utility surface expanded**: new scale and bounds helpers (`makeLinearScale`, `invertLinearScale`, `clampBounds`, `applyDomainOverride`, `filterVisibleSeries`) are exported for reuse across core and extensions.
+- **Configuration ergonomics improved**: per-graph series defaults are now configurable via `options.series`, and package runtime expectations are explicit with Node `>=22` engines metadata.
+
+### Added
+
+- `options.series` — configurable series defaults (`type`, `color`, `lineWidth`, `pointRadius`). Values are applied when a series does not specify them, replacing hardcoded fallbacks in `normalizeSeriesData`.
+- `Graph.registerSampler(name, fn)` — static sampler registry matching the renderer registry pattern. The built-in `"stride"` sampler is pre-registered. Custom samplers receive `(points, maxPoints)` and return a decimated point array.
+- `Graph.samplers` — public `Map<string, GraphSeriesSampler>` exposing the sampler registry.
+- `"engines": { "node": ">=22" }` in `package.json`.
+
+### Changed
+
+- `options.sampling.method` now accepts any registered sampler name, not only `"stride"`. Validation checks that the value is a non-empty string; an unknown method at render time falls back to returning the series unchanged.
+- `normalizeSeriesData(rawData, seriesDefaults?)` now accepts an optional second argument for per-graph series defaults. `Graph.setData` passes `options.series` automatically.
+
+### Fixed
+
+- `graph.setOptions({ pluginErrorBoundary: ... })` now updates the live `ErrorBoundary` instance immediately. Previously the boundary was constructed once at init and never updated.
+- `ErrorBoundary` gains a `configure(settings)` method for live reconfiguration.
+
 ## [0.1.8] - 2026-04-15
 
 ### Added

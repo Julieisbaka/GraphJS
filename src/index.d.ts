@@ -36,7 +36,7 @@ export type DomainOverride = {
 export type SamplingOptions = {
   enabled: boolean;
   maxPoints: number;
-  method: "stride";
+  method: string;
 };
 
 export type ScalabilityOptions = {
@@ -62,6 +62,7 @@ export type GraphOptions = {
   padding?: { top?: number; right?: number; bottom?: number; left?: number };
   immutableInputs?: boolean;
   domain?: DomainOverride;
+    series?: Partial<SeriesDefaults>;
   sampling?: Partial<SamplingOptions>;
   scalability?: Partial<ScalabilityOptions>;
   pluginErrorBoundary?: Partial<PluginErrorBoundaryOptions>;
@@ -265,6 +266,15 @@ export type GraphSeriesRenderer = (
 
 export type BoundsStrategy = (dataBounds: DataBounds, options: GraphOptions) => DataBounds;
 
+export type SeriesDefaults = {
+  type: string;
+  color: string;
+  lineWidth: number;
+  pointRadius: number;
+};
+
+export type GraphSeriesSampler = (points: Point[], maxPoints: number) => Point[];
+
 export class Registry {
   registerPlugin(plugin: GraphPlugin): void;
   unregisterPlugin(pluginId: string): void;
@@ -284,15 +294,18 @@ export class ErrorBoundary {
   enabled: boolean;
   onError: ((args: { pluginId: string; phase: string; error: unknown; context: Record<string, unknown> }) => void) | null;
   constructor(settings?: Partial<PluginErrorBoundaryOptions>);
+    configure(settings?: Partial<PluginErrorBoundaryOptions>): void;
   handle(pluginId: string, phase: string, error: unknown, context?: Record<string, unknown>): void;
 }
 
 export class Graph {
   static registry: Registry;
   static renderers: Map<string, GraphSeriesRenderer>;
+    static samplers: Map<string, GraphSeriesSampler>;
   static registerPlugin(plugin: GraphPlugin): void;
   static unregisterPlugin(pluginId: string): void;
   static registerRenderer(type: string, renderer: GraphSeriesRenderer): void;
+  static registerSampler(name: string, sampler: GraphSeriesSampler): void;
 
   constructor(canvasTarget: string | HTMLCanvasElement, options?: GraphOptions);
 
@@ -329,7 +342,7 @@ export function clamp(value: number, min: number, max: number): number;
 export function decimatePointsStride<T>(points: T[], maxPoints: number): T[];
 export function resolveCanvas(target: string | HTMLCanvasElement): HTMLCanvasElement;
 export function getDevicePixelRatio(): number;
-export function normalizeSeriesData(rawData: Array<Partial<Series>>): Series[];
+export function normalizeSeriesData(rawData: Array<Partial<Series>>, seriesDefaults?: Partial<SeriesDefaults>): Series[];
 export function getDataBounds(seriesList: Array<{ points: Point[] }>): DataBounds;
 export function makeLinearScale(domainMin: number, domainMax: number, rangeMin: number, rangeMax: number): (value: number) => number;
 export function invertLinearScale(px: number, domainMin: number, domainMax: number, rangeMin: number, rangeMax: number): number;

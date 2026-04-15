@@ -3,8 +3,15 @@ import { Registry } from "./Registry.js";
 import { PluginHost } from "./PluginHost.js";
 import { HookRegistry } from "./hooks.js";
 import {
+  computeLayout,
+  createBufferCanvas,
+  drawBackdrop,
+  drawGrid,
+  drawLineSeries,
+  makeStaticLayerKey
+} from "./rendering.js";
+import {
   applyDomainOverride,
-  clamp,
   decimatePointsStride,
   deepFreeze,
   deepMerge,
@@ -17,57 +24,12 @@ import {
 } from "./utils.js";
 import { validateDomain, validateGraphOptions } from "./validation.js";
 
-export function drawLineSeries(ctx, plot, series, xScale, yScale) {
-  const points = series.points;
-  if (!points.length) {
-    return;
-  }
-
-  ctx.save();
-  ctx.strokeStyle = series.color;
-  ctx.lineWidth = series.lineWidth;
-  ctx.beginPath();
-
-  for (let i = 0; i < points.length; i += 1) {
-    const p = points[i];
-    const x = xScale(p.x);
-    const y = yScale(p.y);
-    if (i === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
-  }
-
-  ctx.stroke();
-
-  if (series.pointRadius > 0) {
-    ctx.fillStyle = series.color;
-    for (const p of points) {
-      ctx.beginPath();
-      ctx.arc(xScale(p.x), yScale(p.y), series.pointRadius, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  ctx.restore();
-}
-
-function makeStaticLayerKey(options, plot, bounds) {
-  return JSON.stringify({
-    width: options.width,
-    height: options.height,
-    background: options.background,
-    grid: options.grid,
-    axes: options.axes,
-    plot,
-    bounds
-  });
-}
+export { drawLineSeries } from "./rendering.js";
 
 export class Graph {
   static registry = new Registry();
   static renderers = new Map();
+  static samplers = new Map();
 
   static registerPlugin(plugin) {
     Graph.registry.registerPlugin(plugin);
@@ -85,6 +47,16 @@ export class Graph {
       throw new Error(`Renderer for '${type}' must be a function.`);
     }
     Graph.renderers.set(type, fn);
+  }
+
+  static registerSampler(name, fn) {
+    if (typeof name !== "string" || !name.trim()) {
+      throw new Error("Sampler name must be a non-empty string.");
+    }
+    if (typeof fn !== "function") {
+      throw new Error(`Sampler '${name}' must be a function.`);
+    }
+    Graph.samplers.set(name, fn);
   }
 
   constructor(canvasTarget, options = {}) {
@@ -132,6 +104,10 @@ export class Graph {
 
     if (Array.isArray(nextOptions.plugins)) {
       this.plugins.configure(nextOptions.plugins);
+    }
+
+    if ("pluginErrorBoundary" in nextOptions) {
+      this.plugins._errorBoundary.configure(this.options.pluginErrorBoundary);
     }
 
     this._dirty.options = true;
@@ -223,7 +199,7 @@ export class Graph {
       return this;
     }
 
-    const normalized = normalizeSeriesData(payload.nextData);
+    const normalized = normalizeSeriesData(payload.nextData, this.options.series || {});
     this.data = this.options.immutableInputs ? deepFreeze(normalized) : normalized;
 
     this._dirty.data = true;
@@ -268,29 +244,7 @@ export class Graph {
   }
 
   _createBufferCanvas(width, height, dpr) {
-    const useOffscreen =
-      this.options.scalability.useOffscreenCanvas && typeof OffscreenCanvas !== "undefined";
-
-    const w = Math.max(1, Math.floor(width * dpr));
-    const h = Math.max(1, Math.floor(height * dpr));
-
-    if (useOffscreen) {
-      const canvas = new OffscreenCanvas(w, h);
-      const ctx = canvas.getContext("2d");
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      return { canvas, ctx };
-    }
-
-    if (typeof document !== "undefined") {
-      const canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d");
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      return { canvas, ctx };
-    }
-
-    return { canvas: null, ctx: null };
+    return createBufferCanvas(this.options, width, height, dpr);
   }
 
   _resolveBounds(dataBounds) {
@@ -308,88 +262,23 @@ export class Graph {
       return series;
     }
 
-    if (sampling.method === "stride") {
-      return {
-        ...series,
-        points: decimatePointsStride(series.points, sampling.maxPoints)
-      };
+    const sampler = Graph.samplers.get(sampling.method);
+    if (sampler) {
+      return { ...series, points: sampler(series.points, sampling.maxPoints) };
     }
-
     return series;
   }
 
   _computeLayout() {
-    const { width, height, padding } = this.options;
-    return {
-      left: padding.left,
-      top: padding.top,
-      right: width - padding.right,
-      bottom: height - padding.bottom,
-      width: Math.max(1, width - padding.left - padding.right),
-      height: Math.max(1, height - padding.top - padding.bottom)
-    };
+    return computeLayout(this.options);
   }
 
   _drawBackdrop() {
-    const { width, height, background } = this.options;
-    this.ctx.save();
-    this.ctx.fillStyle = background;
-    this.ctx.fillRect(0, 0, width, height);
-    this.ctx.restore();
+    drawBackdrop(this.ctx, this.options);
   }
 
   _drawGrid(plot, bounds) {
-    const { grid, axes } = this.options;
-    const ctx = this.ctx;
-
-    if (grid.show) {
-      ctx.save();
-      ctx.strokeStyle = grid.color;
-      ctx.lineWidth = grid.lineWidth;
-
-      for (let i = 0; i <= grid.xTicks; i += 1) {
-        const t = i / Math.max(1, grid.xTicks);
-        const x = plot.left + t * plot.width;
-        ctx.beginPath();
-        ctx.moveTo(x, plot.top);
-        ctx.lineTo(x, plot.bottom);
-        ctx.stroke();
-      }
-
-      for (let i = 0; i <= grid.yTicks; i += 1) {
-        const t = i / Math.max(1, grid.yTicks);
-        const y = plot.bottom - t * plot.height;
-        ctx.beginPath();
-        ctx.moveTo(plot.left, y);
-        ctx.lineTo(plot.right, y);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    }
-
-    if (axes.show) {
-      ctx.save();
-      ctx.strokeStyle = axes.color;
-      ctx.lineWidth = axes.lineWidth;
-
-      const x0 = clamp(0, bounds.xMin, bounds.xMax);
-      const y0 = clamp(0, bounds.yMin, bounds.yMax);
-      const x = plot.left + ((x0 - bounds.xMin) / (bounds.xMax - bounds.xMin)) * plot.width;
-      const y = plot.bottom - ((y0 - bounds.yMin) / (bounds.yMax - bounds.yMin)) * plot.height;
-
-      ctx.beginPath();
-      ctx.moveTo(plot.left, y);
-      ctx.lineTo(plot.right, y);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(x, plot.top);
-      ctx.lineTo(x, plot.bottom);
-      ctx.stroke();
-
-      ctx.restore();
-    }
+    drawGrid(this.ctx, this.options, plot, bounds);
   }
 
   _drawStaticLayer(plot, bounds) {
@@ -507,3 +396,4 @@ export class Graph {
 }
 
 Graph.registerRenderer("line", drawLineSeries);
+Graph.registerSampler("stride", decimatePointsStride);
