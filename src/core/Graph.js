@@ -202,7 +202,7 @@ export class Graph {
     }
 
     const normalized = normalizeSeriesData(payload.nextData, this.options.series || {});
-    this.data = this.options.immutableInputs ? deepFreeze(normalized) : normalized;
+    this.data = this.options.immutableInputs && IS_DEV ? deepFreeze(normalized) : normalized;
 
     this._dirty.data = true;
     this._dirty.render = true;
@@ -243,10 +243,6 @@ export class Graph {
 
     this.plugins.call("afterResize", { width: safeW, height: safeH, dpr });
     return this;
-  }
-
-  _createBufferCanvas(width, height, dpr) {
-    return createBufferCanvas(this.options, width, height, dpr);
   }
 
   _resolveBounds(dataBounds) {
@@ -298,7 +294,7 @@ export class Graph {
     const dirtyRegen = !this._staticLayer.canvas || this._dirty.options || this._dirty.size || this._dirty.data;
     if (dirtyRegen || makeStaticLayerKey(this.options, plot, bounds) !== this._staticLayer.key) {
       const key = makeStaticLayerKey(this.options, plot, bounds);
-      const layer = this._createBufferCanvas(this.options.width, this.options.height, dpr);
+      const layer = createBufferCanvas(this.options, this.options.width, this.options.height, dpr);
       this._staticLayer.canvas = layer.canvas;
       this._staticLayer.ctx = layer.ctx;
       this._staticLayer.key = key;

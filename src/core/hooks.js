@@ -1,3 +1,5 @@
+const IS_DEV = true; // replaced with false at build time via --define:IS_DEV=false
+
 export const BUILTIN_HOOKS = Object.freeze([
   "beforeInit",
   "afterInit",
@@ -21,8 +23,10 @@ export class HookRegistry {
   }
 
   register(hookName) {
-    if (typeof hookName !== "string" || !hookName.trim()) {
-      throw new Error("Hook name must be a non-empty string.");
+    if (IS_DEV) {
+      if (typeof hookName !== "string" || !hookName.trim()) {
+        throw new Error("Hook name must be a non-empty string.");
+      }
     }
     this._hooks.add(hookName);
   }
