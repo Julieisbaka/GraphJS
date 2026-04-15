@@ -48,6 +48,8 @@ export const panZoomPlugin = {
   defaults: {
     enabled: true,
     zoomStep: 0.12,
+    minZoomStep: 0.01,
+    maxZoomStep: 0.8,
     minSpanX: 0.0001,
     minSpanY: 0.0001
   },
@@ -73,7 +75,7 @@ export const panZoomPlugin = {
               options.enabled = payload.enabled;
             }
             if (Number.isFinite(payload.zoomStep)) {
-              options.zoomStep = Math.max(0.01, Math.min(0.8, payload.zoomStep));
+              options.zoomStep = clamp(payload.zoomStep, options.minZoomStep, options.maxZoomStep);
             }
             graph.render();
             return { enabled: options.enabled, zoomStep: options.zoomStep };

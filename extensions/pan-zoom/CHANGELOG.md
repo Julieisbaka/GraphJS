@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2026-04-15
+
+### Changed
+
+- `minZoomStep` and `maxZoomStep` are now configurable plugin options (defaults: `0.01` and `0.8`). Previously the clamp bounds were hardcoded in the `pan-zoom.set` command handler.
+
 ## [0.0.3] - 2026-04-15
 
 ### Changed
