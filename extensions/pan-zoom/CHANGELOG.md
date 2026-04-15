@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.0.6] - 2026-04-15
 
 ### Changed
-- Updated `clampBounds` import in `index.js` to use the new export from `graphjs/core/utils` instead of the old internal helper. No behavior change, just removes the local duplicate implementation.
+- Updated `clampBounds` import in `index.js` to use the public export from `graphjs/utils` instead of the old internal helper. No behavior change, just removes the local duplicate implementation.
 
 ## [0.0.5] - 2026-04-15
 
