@@ -124,15 +124,19 @@ Any hook can return `false` to cancel the current stage.
 - Dependency-aware plugin ordering via `before` / `after`
 - Optional capability flags (`hooks`, `needsLayout`, `needsBounds`, `needsData`) for optimized hook dispatch
 - Hook context versioning (`context.contextVersion`)
-- Optional plugin error boundary (`pluginErrorBoundary`) for sandboxed plugin failures
+- Optional plugin error boundary (`pluginErrorBoundary`) — live-reconfigurable via `graph.setOptions({ pluginErrorBoundary: ... })`
 
 ## Core API
 
+### Instance methods
+
 - `new Graph(canvasOrSelector, options)`
 - `graph.setOptions(options)`
+- `graph.getOptions()`
 - `graph.setDomain(domain)`
 - `graph.clearDomain()`
 - `graph.getDomain()`
+- `graph.setBoundsStrategy(fn)`
 - `graph.setData(series[])`
 - `graph.addSeries(series)`
 - `graph.resize(width, height)`
@@ -140,51 +144,66 @@ Any hook can return `false` to cancel the current stage.
 - `graph.clear()`
 - `graph.destroy()`
 - `graph.registerCommand(name, handler, metadata?, pluginId?)`
+- `graph.unregisterCommand(name)`
 - `graph.executeCommand(name, payload?)`
 - `graph.listCommands()`
+
+### Static methods and registries
+
+- `Graph.registerPlugin(plugin)` — add a plugin to the global registry
+- `Graph.unregisterPlugin(pluginId)` — remove a plugin from the global registry
+- `Graph.registerRenderer(type, fn)` — register a custom series renderer (e.g. `"bar"`, `"scatter"`)
+- `Graph.renderers` — `Map<string, fn>` of all registered renderers
+- `Graph.registerSampler(name, fn)` — register a custom data sampler
+- `Graph.samplers` — `Map<string, fn>` of all registered samplers
 
 ### Notable core options
 
 - `immutableInputs` (boolean): freeze normalized data for safer consumption
 - `domain` (`{ xMin, xMax, yMin, yMax } | null`): override data-derived bounds
-- `sampling`: `{ enabled, maxPoints, method: "stride" }`
+- `series`: `{ type, color, lineWidth, pointRadius }` — per-graph series defaults applied when a series omits those fields
+- `sampling`: `{ enabled, maxPoints, method }` — `method` is the name of any registered sampler (built-in: `"stride"`)
 - `scalability`: `{ dirtyRender, layerCaching, useOffscreenCanvas }`
-- `pluginErrorBoundary`: `{ enabled, onError }`
+- `pluginErrorBoundary`: `{ enabled, onError }` — can be updated live via `graph.setOptions({ pluginErrorBoundary: ... })`
 
 ## Utility exports
 
-GraphJS publicly exports helpers from `src/core/utils.js`:
+GraphJS exports helpers for use in extensions and custom renderers.
 
-- `isPlainObject`
-- `deepMerge`
-- `deepFreeze`
-- `clamp`
+Available from the main entry (`graphjs`):
+
 - `decimatePointsStride`
 - `resolveCanvas`
 - `getDevicePixelRatio`
 - `normalizeSeriesData`
 - `getDataBounds`
 
-Import either from the main package entry or the `graphjs/utils` subpath.
+Also available via the `graphjs/utils` subpath (not in the main entry):
+
+- `makeLinearScale`
+- `invertLinearScale`
+- `clampBounds`
+- `applyDomainOverride`
+- `filterVisibleSeries`
+- `isPlainObject`
+- `deepMerge`
+- `deepFreeze`
+- `clamp`
 
 ## Typed API support
 
 GraphJS ships TypeScript declaration files (`src/index.d.ts`) for the core API,
 plugin contract, command system, options, and utility exports.
 
-## Extension roadmap
+## First-party extensions
 
-GraphJS core is intentionally minimal. First-party extensions live separately:
+First-party extensions live at `extensions/` in this workspace:
 
-- Legends
-- Tooltips / cursors
-- Pan & zoom
-- Time scales
+- `extensions/crosshair`
+- `extensions/legend`
+- `extensions/pan-zoom`
+- `extensions/time-scale`
+- `extensions/tooltip-cursor`
+- `extensions/watermark`
 
-## First-party extensions (workspace-level)
-
-First-party extensions are intentionally separated from package source and live at:
-
-- `../extensions/`
-
-This keeps the core package lightweight while still providing official plugin modules.
+Each extension is a standalone package with its own `package.json` and can be used independently.

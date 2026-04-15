@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2026-04-15
+
+### Changed
+
+- Removed `deepFreeze`, `clamp`, `isPlainObject`, and `deepMerge` from the main `graphjs` package entry point. These are internal utilities that were previously public, preventing tree-shakers from dropping them when only `Graph` was imported. They remain available via `graphjs/utils` for consumers that need them.
+
 ## [0.2.1] - 2026-04-15
 
 ### Fixed

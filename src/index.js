@@ -4,10 +4,6 @@ export { HookRegistry, BUILTIN_HOOKS } from "./core/hooks.js";
 export { DEFAULT_OPTIONS } from "./core/defaults.js";
 export { validateDomain, validateGraphOptions, validatePluginContract } from "./core/validation.js";
 export {
-	isPlainObject,
-	deepMerge,
-	deepFreeze,
-	clamp,
 	decimatePointsStride,
 	resolveCanvas,
 	getDevicePixelRatio,
