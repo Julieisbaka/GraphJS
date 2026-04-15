@@ -179,3 +179,76 @@ test("PluginHost clears plugin commands when plugin is removed and respects capa
   assert.deepEqual(graph.clearPluginCommandsCalls, ["gated-plugin"]);
   assert.equal(graph.listCommands().length, 0);
 });
+
+test("PluginHost error boundary swallows plugin hook errors when enabled and calls onError", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+
+  let onErrorCalls = 0;
+  graph.options.pluginErrorBoundary = {
+    enabled: true,
+    onError(args) {
+      onErrorCalls += 1;
+      assert.equal(args.pluginId, "faulty-plugin");
+      assert.equal(args.phase, "hook:beforeRender");
+      assert.ok(args.error instanceof Error);
+    }
+  };
+
+  const host = new PluginHost(graph, registry, hooks);
+
+  registry.registerPlugin({
+    id: "faulty-plugin",
+    hooks: {
+      beforeRender() {
+        throw new Error("boom");
+      }
+    }
+  });
+
+  host.configure(["faulty-plugin"]);
+
+  assert.doesNotThrow(() => {
+    host.call("beforeRender", {
+      layout: { left: 0, top: 0, right: 1, bottom: 1, width: 1, height: 1 },
+      bounds: { xMin: 0, xMax: 1, yMin: 0, yMax: 1 }
+    });
+  });
+
+  assert.equal(onErrorCalls, 1);
+});
+
+test("PluginHost error boundary rethrows plugin hook errors when disabled", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+
+  graph.options.pluginErrorBoundary = {
+    enabled: false,
+    onError: null
+  };
+
+  const host = new PluginHost(graph, registry, hooks);
+
+  registry.registerPlugin({
+    id: "faulty-plugin",
+    hooks: {
+      beforeRender() {
+        throw new Error("explode");
+      }
+    }
+  });
+
+  host.configure(["faulty-plugin"]);
+
+  assert.throws(
+    () => {
+      host.call("beforeRender", {
+        layout: { left: 0, top: 0, right: 1, bottom: 1, width: 1, height: 1 },
+        bounds: { xMin: 0, xMax: 1, yMin: 0, yMax: 1 }
+      });
+    },
+    /explode/
+  );
+});

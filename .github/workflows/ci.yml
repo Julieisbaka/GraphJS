@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  lint:
-    name: Lint
+  checks:
+    name: Lint and Test
     runs-on: ubuntu-latest
 
     steps:
@@ -17,6 +17,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Lint core
         run: node --check src/index.js src/core/*.js
@@ -27,3 +30,6 @@ jobs:
             echo "Checking $f"
             node --check "$f"
           done
+
+      - name: Run tests
+        run: npm test
