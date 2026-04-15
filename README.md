@@ -93,7 +93,7 @@ const myPlugin = {
   },
   install(graph, options, api) {
     // setup work
-    // api.state / api.setState / api.registerHook / api.registerCommand
+    // api.getPluginState / api.setState / api.registerHook / api.registerCommand
   },
   commands: {
     // declarative command support (optional)

@@ -111,7 +111,6 @@ export class PluginHost {
     this.hookRegistry = hookRegistry;
     this.plugins = [];
     this.pluginStates = new Map();
-    this._deprecatedHookWarnings = new Set();
   }
 
   _handlePluginError(plugin, phase, error, context = {}) {
@@ -229,10 +228,6 @@ export class PluginHost {
     const host = this;
     return Object.freeze({
       id: pluginId,
-      /** @deprecated Use `getPluginState(api.id)` instead. Will be removed in a future release. */
-      get state() {
-        return host.pluginStates.get(pluginId);
-      },
       getPluginState(id = pluginId) {
         return host.pluginStates.get(id);
       },
@@ -274,16 +269,7 @@ export class PluginHost {
         continue;
       }
 
-      let method = plugin.hooks && plugin.hooks[hookName];
-      if (!method && typeof plugin[hookName] === "function") {
-        const warningKey = `${plugin.id}:${hookName}`;
-        if (!this._deprecatedHookWarnings.has(warningKey)) {
-          this._deprecatedHookWarnings.add(warningKey);
-          // eslint-disable-next-line no-console
-          console.warn(`[GraphJS] Plugin '${plugin.id}' defines hook '${hookName}' directly on the plugin object. This is deprecated — move it to plugin.hooks.${hookName}.`);
-        }
-        method = plugin[hookName];
-      }
+      const method = plugin.hooks && plugin.hooks[hookName];
 
       if (typeof method !== "function") {
         continue;

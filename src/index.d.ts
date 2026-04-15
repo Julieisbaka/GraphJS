@@ -63,8 +63,6 @@ export type PluginCapabilityFlags = {
 
 export type PluginApi = {
   readonly id: string;
-  /** @deprecated Use `getPluginState(api.id)` instead. Will be removed in a future release. */
-  readonly state: Record<string, unknown>;
   getPluginState(pluginId?: string): Record<string, unknown> | undefined;
   setState(partialState: Record<string, unknown>): void;
   registerHook(hookName: string): void;

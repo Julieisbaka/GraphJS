@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - 2026-04-15
+
+### Removed
+
+- Removed deprecated `PluginApi.state` getter. Use `api.getPluginState(api.id)` (or `api.getPluginState()`) instead.
+- Removed support for deprecated flat plugin hooks on the plugin object (e.g. `plugin.afterRender`). Hooks must be defined under `plugin.hooks`.
+
 ## [0.1.4] - 2026-04-14
 
 ### Fixed
