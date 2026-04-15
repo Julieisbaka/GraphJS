@@ -1,6 +1,6 @@
 {
   "name": "graphjs",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "A zero-dependency, lightweight JavaScript graphing core with powerful plugin hooks.",
   "type": "module",
   "main": "./src/index.js",
@@ -29,6 +29,9 @@
     "zero-dependency"
   ],
   "license": "MIT",
+    "engines": {
+      "node": ">=22"
+    },
   "scripts": {
     "lint": "node --check src/index.js src/core/*.js",
     "test": "node --test \"test/*.test.js\"",

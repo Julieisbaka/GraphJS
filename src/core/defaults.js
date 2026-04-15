@@ -5,6 +5,12 @@ export const DEFAULT_OPTIONS = Object.freeze({
   padding: { top: 24, right: 24, bottom: 32, left: 40 },
   immutableInputs: false,
   domain: null,
+  series: {
+    type: "line",
+    color: "#3b82f6",
+    lineWidth: 2,
+    pointRadius: 0
+  },
   sampling: {
     enabled: false,
     maxPoints: 1200,

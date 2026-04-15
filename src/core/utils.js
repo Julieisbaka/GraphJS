@@ -87,7 +87,7 @@ export function getDevicePixelRatio() {
  * @returns {Array<object>} Normalized series list.
  * @throws {Error} If rawData is not an array.
  */
-export function normalizeSeriesData(rawData) {
+export function normalizeSeriesData(rawData, seriesDefaults = {}) {
   if (!Array.isArray(rawData)) {
     throw new Error("Data must be an array of series.");
   }
@@ -98,10 +98,10 @@ export function normalizeSeriesData(rawData) {
 
     return {
       id: safeSeries.id || `series_${index}`,
-      type: safeSeries.type || "line",
-      color: safeSeries.color || "#3b82f6",
-      lineWidth: safeSeries.lineWidth ?? 2,
-      pointRadius: safeSeries.pointRadius ?? 0,
+      type: safeSeries.type || seriesDefaults.type || "line",
+      color: safeSeries.color || seriesDefaults.color || "#3b82f6",
+      lineWidth: safeSeries.lineWidth ?? seriesDefaults.lineWidth ?? 2,
+      pointRadius: safeSeries.pointRadius ?? seriesDefaults.pointRadius ?? 0,
       visible: safeSeries.visible !== false,
       points: points.map((p) => ({ x: Number(p.x), y: Number(p.y) }))
     };

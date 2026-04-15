@@ -47,7 +47,7 @@ export function validateGraphOptions(options) {
   assert(typeof options.sampling === "object", "options.sampling must be an object.");
   assert(typeof options.sampling.enabled === "boolean", "options.sampling.enabled must be a boolean.");
   assert(Number.isInteger(options.sampling.maxPoints) && options.sampling.maxPoints >= 2, "options.sampling.maxPoints must be an integer >= 2.");
-  assert(options.sampling.method === "stride", "options.sampling.method currently supports only 'stride'.");
+  assert(typeof options.sampling.method === "string" && options.sampling.method.trim().length > 0, "options.sampling.method must be a non-empty string.");
 
   assert(typeof options.scalability === "object", "options.scalability must be an object.");
   for (const key of ["dirtyRender", "layerCaching", "useOffscreenCanvas"]) {

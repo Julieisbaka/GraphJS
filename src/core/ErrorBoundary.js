@@ -17,6 +17,11 @@ export class ErrorBoundary {
     this.enabled = settings.enabled !== false;
     this.onError = settings.onError ?? null;
   }
+  configure(settings = {}) {
+    this.enabled = settings.enabled !== false;
+    this.onError = settings.onError ?? null;
+  }
+
 
   handle(pluginId, phase, error, context = {}) {
     if (!this.enabled) {

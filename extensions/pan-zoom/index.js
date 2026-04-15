@@ -1,4 +1,4 @@
-import { clampBounds } from "graphjs/utils";
+import { clampBounds } from "../../src/core/utils.js";
 
 /**
  * Computes local canvas coordinates for a pointer event.
