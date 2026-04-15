@@ -2,6 +2,8 @@ import { deepMerge } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 
+const IS_DEV = process.env.NODE_ENV !== "production";
+
 function getPluginPriority(plugin) {
   return Number.isFinite(plugin.priority) ? plugin.priority : 0;
 }
@@ -163,7 +165,7 @@ export class PluginHost {
           throw new Error(`Unknown plugin: ${entry.id}`);
         }
 
-        validatePluginContract(plugin);
+        if (IS_DEV) validatePluginContract(plugin);
 
         const options = deepMerge(plugin.defaults || {}, entry.options || {});
         return { plugin, options };

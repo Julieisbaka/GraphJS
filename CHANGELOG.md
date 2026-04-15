@@ -2,11 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.4] - 2026-04-15
+## [0.2.5] - 2026-04-15
 
 ### Added
 
-- `src/index.prod.js` — production entry point that excludes all validation code. The minified build (`dist/graphjs.min.js`) now bundles from this entry, removing ~2–3 KB of error-message strings that are only useful during development. The full validation entry (`src/index.js`) is unchanged.
+- `src/index.prod.js` — production entry point. Combined with compile-time dead-code elimination (see Changed), the minified build now fully excludes `validation.js`.
+
+### Changed
+
+- All `validateGraphOptions`, `validateDomain`, and `validatePluginContract` calls are now guarded by `IS_DEV = process.env.NODE_ENV !== "production"`. The production build passes `--define:process.env.NODE_ENV='"production"'` to esbuild, which statically evaluates `IS_DEV` to `false`, removes all `if (false)` validation blocks as dead code, and drops the unused imports — so `validation.js` is completely absent from `dist/graphjs.min.js`. The previous `src/index.prod.js` approach alone saved only ~0.3 KB because the internal imports still pulled validation in; this change eliminates the root cause.
+
+## [0.2.4] - 2026-04-15
 
 ### Changed
 

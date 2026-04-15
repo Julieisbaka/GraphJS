@@ -24,6 +24,8 @@ import {
 } from "./utils.js";
 import { validateDomain, validateGraphOptions } from "./validation.js";
 
+const IS_DEV = process.env.NODE_ENV !== "production";
+
 export { drawLineSeries } from "./rendering.js";
 
 export class Graph {
@@ -67,7 +69,7 @@ export class Graph {
     }
 
     this.options = deepMerge(DEFAULT_OPTIONS, options);
-    validateGraphOptions(this.options);
+    if (IS_DEV) validateGraphOptions(this.options);
 
     this.data = [];
     this.hooks = new HookRegistry();
@@ -100,7 +102,7 @@ export class Graph {
     if ("domain" in nextOptions) {
       this.options.domain = nextOptions.domain ?? null;
     }
-    validateGraphOptions(this.options);
+    if (IS_DEV) validateGraphOptions(this.options);
 
     if ("pluginErrorBoundary" in nextOptions) {
       this.plugins.configureErrorBoundary(this.options.pluginErrorBoundary);
@@ -128,7 +130,7 @@ export class Graph {
   }
 
   setDomain(domain = null) {
-    validateDomain(domain);
+    if (IS_DEV) validateDomain(domain);
     this.options.domain = domain;
     this._dirty.options = true;
     this._dirty.render = true;
@@ -252,7 +254,7 @@ export class Graph {
       return this._boundsStrategy(dataBounds, this.options);
     }
     const resolved = applyDomainOverride(dataBounds, this.options.domain);
-    validateDomain(resolved);
+    if (IS_DEV) validateDomain(resolved);
     return resolved;
   }
 
