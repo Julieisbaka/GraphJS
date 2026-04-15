@@ -13,9 +13,7 @@ See `CHANGELOG.md` for release history.
 
 ## Install
 
-Copy this folder into your project, or publish and install from npm later.
-
-A simple runnable demo is available at workspace root: `./demo.html`.
+Copy this folder into your project or download from releases.
 
 ## Quick Start
 
@@ -176,13 +174,12 @@ plugin contract, command system, options, and utility exports.
 
 ## Extension roadmap
 
-GraphJS core is intentionally minimal. Planned first-party extensions can live separately:
+GraphJS core is intentionally minimal. First-party extensions live separately:
 
 - Legends
 - Tooltips / cursors
 - Pan & zoom
 - Time scales
-- Additional series types (bar, area, scatter)
 
 ## First-party extensions (workspace-level)
 
