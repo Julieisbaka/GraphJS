@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6] - 2026-04-15
+
+### Added
+
+- `ErrorBoundary` class extracted from `PluginHost` — testable standalone class that encapsulates plugin error handling logic. `PluginHost` now delegates to it.
+- `Graph.registerRenderer(type, fn)` — static renderer registry. Extensions can now register custom series types (e.g. `"bar"`, `"scatter"`) without plugin workarounds. The built-in `"line"` renderer is pre-registered.
+- `Graph.renderers` — public `Map<string, GraphSeriesRenderer>` exposing the renderer registry.
+- `graph.setBoundsStrategy(fn)` — override how data bounds are resolved before each render. Receives `(dataBounds, options)` and must return a `DataBounds` object. Passing `null` restores default domain-override behavior.
+- Exported `drawLineSeries` from `Graph.js` so extensions can reference or wrap the built-in line renderer.
+
 ## [0.1.5] - 2026-04-15
 
 ### Removed

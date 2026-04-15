@@ -1,5 +1,6 @@
 import { deepMerge } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
+import { ErrorBoundary } from "./ErrorBoundary.js";
 
 const HOOK_CONTEXT_VERSION = 1;
 
@@ -111,25 +112,11 @@ export class PluginHost {
     this.hookRegistry = hookRegistry;
     this.plugins = [];
     this.pluginStates = new Map();
+    this._errorBoundary = new ErrorBoundary(graph.options?.pluginErrorBoundary ?? {});
   }
 
   _handlePluginError(plugin, phase, error, context = {}) {
-    const settings = this.graph.options?.pluginErrorBoundary || { enabled: true, onError: null };
-
-    if (!settings.enabled) {
-      throw error;
-    }
-
-    if (typeof settings.onError === "function") {
-      try {
-        settings.onError({ pluginId: plugin.id, phase, error, context });
-      } catch {
-        // no-op: avoid recursive error loops in error handlers
-      }
-    }
-
-    // eslint-disable-next-line no-console
-    console.error(`[GraphJS] Plugin error (${plugin.id} @ ${phase})`, error);
+    this._errorBoundary.handle(plugin.id, phase, error, context);
   }
 
   _pluginCanRunForHook(plugin, hookName, context) {

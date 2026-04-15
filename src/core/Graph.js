@@ -14,7 +14,7 @@ import {
 } from "./utils.js";
 import { validateDomain, validateGraphOptions } from "./validation.js";
 
-function drawLineSeries(ctx, plot, series, xScale, yScale) {
+export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   const points = series.points;
   if (!points.length) {
     return;
@@ -64,6 +64,7 @@ function makeStaticLayerKey(options, plot, bounds) {
 
 export class Graph {
   static registry = new Registry();
+  static renderers = new Map();
 
   static registerPlugin(plugin) {
     Graph.registry.registerPlugin(plugin);
@@ -71,6 +72,16 @@ export class Graph {
 
   static unregisterPlugin(pluginId) {
     Graph.registry.unregisterPlugin(pluginId);
+  }
+
+  static registerRenderer(type, fn) {
+    if (typeof type !== "string" || !type.trim()) {
+      throw new Error("Renderer type must be a non-empty string.");
+    }
+    if (typeof fn !== "function") {
+      throw new Error(`Renderer for '${type}' must be a function.`);
+    }
+    Graph.renderers.set(type, fn);
   }
 
   constructor(canvasTarget, options = {}) {
@@ -101,6 +112,7 @@ export class Graph {
     };
 
     this._destroyed = false;
+    this._boundsStrategy = null;
 
     this.plugins.configure(this.options.plugins || []);
     this.plugins.call("beforeInit", { options: this.options });
@@ -123,6 +135,14 @@ export class Graph {
 
   getOptions() {
     return deepMerge({}, this.options);
+  }
+
+  setBoundsStrategy(fn) {
+    if (fn !== null && typeof fn !== "function") {
+      throw new Error("setBoundsStrategy requires a function or null.");
+    }
+    this._boundsStrategy = fn;
+    return this;
   }
 
   setDomain(domain = null) {
@@ -268,6 +288,10 @@ export class Graph {
   }
 
   _resolveBounds(dataBounds) {
+    if (this._boundsStrategy) {
+      return this._boundsStrategy(dataBounds, this.options);
+    }
+
     const domain = this.options.domain;
     if (!domain) {
       return { ...dataBounds };
@@ -467,8 +491,8 @@ export class Graph {
         continue;
       }
 
-      if (renderSeries.type === "line") {
-        drawLineSeries(this.ctx, plot, renderSeries, xScale, yScale);
+      if (Graph.renderers.has(renderSeries.type)) {
+        Graph.renderers.get(renderSeries.type)(this.ctx, plot, renderSeries, xScale, yScale);
       }
 
       this.plugins.call("afterDrawSeries", seriesPayload);
@@ -496,3 +520,5 @@ export class Graph {
     this.plugins.call("afterDestroy", {});
   }
 }
+
+Graph.registerRenderer("line", drawLineSeries);

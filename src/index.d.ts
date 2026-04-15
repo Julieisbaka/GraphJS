@@ -255,6 +255,16 @@ export type GraphPlugin = {
   hooks?: GraphPluginHooks;
 };
 
+export type GraphSeriesRenderer = (
+  ctx: CanvasRenderingContext2D,
+  plot: PlotLayout,
+  series: Series,
+  xScale: (value: number) => number,
+  yScale: (value: number) => number
+) => void;
+
+export type BoundsStrategy = (dataBounds: DataBounds, options: GraphOptions) => DataBounds;
+
 export class Registry {
   registerPlugin(plugin: GraphPlugin): void;
   unregisterPlugin(pluginId: string): void;
@@ -270,10 +280,19 @@ export class HookRegistry {
 
 export const BUILTIN_HOOKS: readonly string[];
 
+export class ErrorBoundary {
+  enabled: boolean;
+  onError: ((args: { pluginId: string; phase: string; error: unknown; context: Record<string, unknown> }) => void) | null;
+  constructor(settings?: Partial<PluginErrorBoundaryOptions>);
+  handle(pluginId: string, phase: string, error: unknown, context?: Record<string, unknown>): void;
+}
+
 export class Graph {
   static registry: Registry;
+  static renderers: Map<string, GraphSeriesRenderer>;
   static registerPlugin(plugin: GraphPlugin): void;
   static unregisterPlugin(pluginId: string): void;
+  static registerRenderer(type: string, renderer: GraphSeriesRenderer): void;
 
   constructor(canvasTarget: string | HTMLCanvasElement, options?: GraphOptions);
 
@@ -282,6 +301,7 @@ export class Graph {
   setDomain(domain: DomainOverride): this;
   clearDomain(): this;
   getDomain(): DomainOverride;
+  setBoundsStrategy(fn: BoundsStrategy | null): this;
 
   setData(series: Series[]): this;
   addSeries(series: Series): this;
@@ -311,6 +331,13 @@ export function resolveCanvas(target: string | HTMLCanvasElement): HTMLCanvasEle
 export function getDevicePixelRatio(): number;
 export function normalizeSeriesData(rawData: Array<Partial<Series>>): Series[];
 export function getDataBounds(seriesList: Array<{ points: Point[] }>): DataBounds;
+export function drawLineSeries(
+  ctx: CanvasRenderingContext2D,
+  plot: PlotLayout,
+  series: Series,
+  xScale: (value: number) => number,
+  yScale: (value: number) => number
+): void;
 
 export const DEFAULT_OPTIONS: Readonly<GraphOptions>;
 export function validateDomain(domain: DomainOverride): void;
