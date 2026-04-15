@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4] - 2026-04-15
+
+### Added
+
+- `src/index.prod.js` — production entry point that excludes all validation code. The minified build (`dist/graphjs.min.js`) now bundles from this entry, removing ~2–3 KB of error-message strings that are only useful during development. The full validation entry (`src/index.js`) is unchanged.
+
+### Changed
+
+- Validation error messages shortened throughout `validation.js`. The `"options."` prefix and verbose phrasing (`"must be a"`, `"is required"`) have been replaced with a concise `"key: expected type."` format. Existing test assertions updated to match.
+- `PluginHost.call` no longer adds `contextVersion` to the hook context object. The `HOOK_CONTEXT_VERSION` constant has been removed. This eliminates a non-compressible string key from every hook dispatch.
+- `getPluginApi` no longer exposes `listCommands` or `executeCommand` on the plugin API object. These graph-level operations are accessible directly on the `graph` argument passed to every hook and install function.
+- `PluginHost.configure` now skips the full Kahn topological sort when no plugin in the incoming list declares `before` or `after`. In that case (the common path), plugins are sorted by `priority` only with a simple `.sort()` call, avoiding all the `Map`/`Set` allocations in `orderPlugins`.
+
 ## [0.2.3] - 2026-04-15
 
 ### Fixed

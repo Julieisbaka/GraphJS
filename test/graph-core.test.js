@@ -91,7 +91,7 @@ test("setDomain validation boundaries: accepts valid domains and rejects invalid
 
   assert.throws(
     () => graph.setDomain({ xMin: Number.NaN }),
-    /must be a finite number/
+    /finite number/
   );
 
   graph.clearDomain();

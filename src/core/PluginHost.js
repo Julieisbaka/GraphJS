@@ -2,8 +2,6 @@ import { deepMerge } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 
-const HOOK_CONTEXT_VERSION = 1;
-
 function getPluginPriority(plugin) {
   return Number.isFinite(plugin.priority) ? plugin.priority : 0;
 }
@@ -171,7 +169,9 @@ export class PluginHost {
         return { plugin, options };
       });
 
-    this.plugins = orderPlugins(normalized);
+    this.plugins = normalized.some((r) => r.plugin.before?.length || r.plugin.after?.length)
+      ? orderPlugins(normalized)
+      : normalized.sort((a, b) => getPluginPriority(b.plugin) - getPluginPriority(a.plugin));
 
     for (const { plugin, options } of this.plugins) {
       if (!this.pluginStates.has(plugin.id)) {
@@ -234,12 +234,6 @@ export class PluginHost {
       },
       unregisterCommand(commandName) {
         host.graph.unregisterCommand(commandName);
-      },
-      listCommands() {
-        return host.graph.listCommands();
-      },
-      executeCommand(commandName, payload) {
-        return host.graph.executeCommand(commandName, payload);
       }
     });
   }
@@ -251,8 +245,7 @@ export class PluginHost {
 
     const hookContext = {
       ...context,
-      hookName,
-      contextVersion: HOOK_CONTEXT_VERSION
+      hookName
     };
 
     for (const { plugin, options } of this.plugins) {

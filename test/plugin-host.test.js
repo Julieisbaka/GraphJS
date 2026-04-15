@@ -73,7 +73,7 @@ test("PluginHost orders plugins and injects hook context metadata", () => {
     after: ["b"],
     hooks: {
       beforeRender(_graph, context) {
-        order.push(`a:${context.hookName}:${context.contextVersion}`);
+        order.push(`a:${context.hookName}`);
       }
     }
   });
@@ -82,7 +82,7 @@ test("PluginHost orders plugins and injects hook context metadata", () => {
     id: "b",
     hooks: {
       beforeRender(_graph, context) {
-        order.push(`b:${context.hookName}:${context.contextVersion}`);
+        order.push(`b:${context.hookName}`);
       }
     }
   });
@@ -94,8 +94,8 @@ test("PluginHost orders plugins and injects hook context metadata", () => {
   });
 
   assert.deepEqual(order, [
-    "b:beforeRender:1",
-    "a:beforeRender:1"
+    "b:beforeRender",
+    "a:beforeRender"
   ]);
 });
 

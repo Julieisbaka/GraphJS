@@ -102,7 +102,6 @@ const myPlugin = {
   hooks: {
     beforeRender(graph, ctx, options, api) {
       // return false to cancel this phase
-      // ctx.contextVersion provides hook-context versioning
     }
   }
 };
@@ -123,7 +122,6 @@ Any hook can return `false` to cancel the current stage.
 
 - Dependency-aware plugin ordering via `before` / `after`
 - Optional capability flags (`hooks`, `needsLayout`, `needsBounds`, `needsData`) for optimized hook dispatch
-- Hook context versioning (`context.contextVersion`)
 - Optional plugin error boundary (`pluginErrorBoundary`) — live-reconfigurable via `graph.setOptions({ pluginErrorBoundary: ... })`
 
 ## Core API
