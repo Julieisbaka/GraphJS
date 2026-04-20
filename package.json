@@ -11,7 +11,7 @@
       "default": "./src/index.js"
     },
     "./utils": {
-      "types": "./src/index.d.ts",
+      "types": "./src/utils.d.ts",
       "default": "./src/core/utils.js"
     }
   },

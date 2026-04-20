@@ -168,16 +168,13 @@ Any hook can return `false` to cancel the current stage.
 
 GraphJS exports helpers for use in extensions and custom renderers.
 
-Available from the main entry (`graphjs`):
+All utility functions are available exclusively via the `graphjs/utils` subpath:
 
 - `decimatePointsStride`
 - `resolveCanvas`
 - `getDevicePixelRatio`
 - `normalizeSeriesData`
 - `getDataBounds`
-
-Also available via the `graphjs/utils` subpath (not in the main entry):
-
 - `makeLinearScale`
 - `invertLinearScale`
 - `clampBounds`
