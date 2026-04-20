@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.8] - 2026-04-20
+
+### Fixed
+
+- Added missing `clamp` to the import from `../../src/core/utils.js`. The `pan-zoom.set` command was calling `clamp()` to bound `zoomStep`, but only `clampBounds` was imported, causing a `ReferenceError` at runtime.
+
 ## [0.0.7] - 2026-04-15
 
 ### Changed
