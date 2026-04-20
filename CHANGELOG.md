@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-04-20
+
+### Changed
+
+- Removed all utility functions (`decimatePointsStride`, `resolveCanvas`, `getDevicePixelRatio`, `normalizeSeriesData`, `getDataBounds`) from the main `graphjs` package entry point. These are now exclusively accessible via the `graphjs/utils` subpath, consistent with the other internal utilities (`makeLinearScale`, `invertLinearScale`, `clampBounds`, `applyDomainOverride`, `filterVisibleSeries`, `isPlainObject`, `deepMerge`, `deepFreeze`, `clamp`). Consumers importing utilities from the main entry must update their imports to use `graphjs/utils`.
+- Added dedicated `src/utils.d.ts` TypeScript declarations for the `graphjs/utils` subpath. The `./utils` export map entry now points to this file for types instead of the main `src/index.d.ts`.
+
 ## [0.2.8] - 2026-04-15
 
 ### Added
