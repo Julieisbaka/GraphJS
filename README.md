@@ -187,8 +187,10 @@ All utility functions are available exclusively via the `graphjs/utils` subpath:
 
 ## Typed API support
 
-GraphJS ships TypeScript declaration files (`src/index.d.ts`) for the core API,
-plugin contract, command system, options, and utility exports.
+GraphJS ships TypeScript declaration files for the core API, plugin contract,
+command system, and options (`src/index.d.ts`). Utility function types are
+declared separately in `src/utils.d.ts` and are exposed via the `graphjs/utils`
+subpath entry.
 
 ## First-party extensions
 
