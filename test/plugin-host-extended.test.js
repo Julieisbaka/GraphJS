@@ -136,18 +136,55 @@ test("PluginHost.configure: cyclic before/after falls back to priority order", (
   assert.equal(order[0], "b");
 });
 
-test("PluginHost.configure: ignores before/after references to unknown ids", () => {
+test("PluginHost.configure: before:[knownId] forces the current plugin to run first", () => {
   const registry = new Registry();
   const hooks = new HookRegistry();
   const graph = createGraphStub();
   const host = new PluginHost(graph, registry, hooks);
 
   const order = [];
+  // Without the `before:["b"]` directive, equal priority would order by array order.
+  // With it, "a" must precede "b" (a's hooks run before b's).
   host.configure([
-    { id: "a", before: ["does-not-exist"], install() { order.push("a"); } },
-    { id: "b", install() { order.push("b"); } }
+    { id: "b", hooks: { beforeRender() { order.push("b"); } } },
+    { id: "a", before: ["b"], hooks: { beforeRender() { order.push("a"); } } }
   ]);
+
+  host.call("beforeRender", { layout: {}, bounds: {} });
+  assert.deepEqual(order, ["a", "b"]);
+});
+
+test("PluginHost.configure: ignores after:[unknownId] references", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  const order = [];
+  assert.doesNotThrow(() =>
+    host.configure([
+      { id: "a", after: ["does-not-exist"], install() { order.push("a"); } },
+      { id: "b", install() { order.push("b"); } }
+    ])
+  );
   assert.equal(order.length, 2);
+});
+
+test("PluginHost.configure: duplicate before/after entries are deduped", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  // Listing the same dep twice should not double-increment the indegree counter
+  // (covers the `if (!outgoing.get(...).has(...))` guard).
+  const order = [];
+  host.configure([
+    { id: "a", before: ["b", "b"], hooks: { beforeRender() { order.push("a"); } } },
+    { id: "b", after: ["a", "a"], hooks: { beforeRender() { order.push("b"); } } }
+  ]);
+  host.call("beforeRender", { layout: {}, bounds: {} });
+  assert.deepEqual(order, ["a", "b"]);
 });
 
 // ---------------------------------------------------------------------------

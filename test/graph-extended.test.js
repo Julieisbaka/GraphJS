@@ -335,6 +335,33 @@ test("Graph.render: returning false from beforeLayout/beforeRender short-circuit
   assert.equal(stub.calls.stroke, before, "no series drawn when beforeRender returns false");
 });
 
+test("Graph.render: falls back to direct draw when layer caching is on but no canvas backend exists", () => {
+  // No global `document` and no `OffscreenCanvas` → createBufferCanvas returns
+  // {canvas: null, ctx: null}, so _drawStaticLayer must fall through to
+  // drawing the backdrop and grid directly on the main context.
+  const previousDoc = globalThis.document;
+  const previousOffscreen = globalThis.OffscreenCanvas;
+  // eslint-disable-next-line no-undef
+  delete globalThis.OffscreenCanvas;
+  // eslint-disable-next-line no-undef
+  delete globalThis.document;
+  try {
+    const { graph, stub } = createGraph({
+      width: 60,
+      height: 40,
+      scalability: { dirtyRender: false, layerCaching: true, useOffscreenCanvas: false }
+    });
+    graph.setData([{ points: [{ x: 0, y: 0 }, { x: 1, y: 1 }] }]);
+    graph.render();
+    // Backdrop fillRect is invoked even though no buffer canvas was created.
+    assert.ok(stub.calls.fillRect >= 1, "backdrop drawn directly when buffer is null");
+    assert.equal(stub.calls.drawImage, 0, "no drawImage when buffer is null");
+  } finally {
+    if (previousDoc !== undefined) globalThis.document = previousDoc;
+    if (previousOffscreen !== undefined) globalThis.OffscreenCanvas = previousOffscreen;
+  }
+});
+
 test("Graph.render: returning false from beforeDrawSeries skips that series", () => {
   // Disable grid/axes so each call to ctx.stroke() corresponds to a series.
   const { graph, stub } = createGraph({

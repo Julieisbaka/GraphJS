@@ -270,3 +270,71 @@ test("pan-zoom beforeDestroy: removes registered DOM listeners", () => {
     h.restore();
   }
 });
+
+test("pan-zoom set command: updates enabled flag and clamps zoomStep", () => {
+  // Capture the registered `set` command via a custom registerCommand spy.
+  const canvasListeners = new Map();
+  const windowListeners = new Map();
+  const previousWindow = globalThis.window;
+  globalThis.window = {
+    addEventListener(name, handler) { windowListeners.set(name, handler); },
+    removeEventListener(name) { windowListeners.delete(name); }
+  };
+  const graph = {
+    canvas: {
+      addEventListener(name, handler) { canvasListeners.set(name, handler); },
+      removeEventListener(name) { canvasListeners.delete(name); },
+      getBoundingClientRect() { return { left: 0, top: 0 }; }
+    },
+    renderCount: 0,
+    render() { this.renderCount += 1; }
+  };
+  const state = {};
+  const commands = new Map();
+  const api = {
+    id: "pan-zoom",
+    getPluginState() { return state; },
+    setState(partial) { Object.assign(state, partial); },
+    registerCommand(name, handler) { commands.set(name, handler); return `pan-zoom.${name}`; },
+    requestRender() { graph.render(); }
+  };
+  const options = {
+    enabled: true,
+    zoomStep: 0.12,
+    minZoomStep: 0.01,
+    maxZoomStep: 0.8,
+    minSpanX: 0.0001,
+    minSpanY: 0.0001
+  };
+
+  try {
+    panZoomPlugin.install(graph, options, api);
+    const set = commands.get("set");
+    assert.equal(typeof set, "function");
+
+    // Toggle enabled off and clamp a too-large zoomStep down to maxZoomStep.
+    let result = set({ enabled: false, zoomStep: 5 });
+    assert.equal(options.enabled, false);
+    assert.equal(options.zoomStep, options.maxZoomStep);
+    assert.deepEqual(result, { enabled: false, zoomStep: options.maxZoomStep });
+    assert.equal(graph.renderCount, 1);
+
+    // Clamp a too-small zoomStep up to minZoomStep.
+    result = set({ zoomStep: 0 });
+    assert.equal(options.zoomStep, options.minZoomStep);
+
+    // Non-finite zoomStep and non-boolean enabled are ignored.
+    result = set({ enabled: "yes", zoomStep: Number.NaN });
+    assert.equal(options.enabled, false, "enabled unchanged when payload.enabled is not boolean");
+    assert.equal(options.zoomStep, options.minZoomStep, "zoomStep unchanged when payload.zoomStep is not finite");
+
+    // Empty payload still triggers a render and returns current values.
+    const before = graph.renderCount;
+    result = set();
+    assert.equal(graph.renderCount, before + 1);
+    assert.deepEqual(result, { enabled: false, zoomStep: options.minZoomStep });
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+  }
+});

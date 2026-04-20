@@ -273,6 +273,27 @@ test("createBufferCanvas: returns nulls when getContext('2d') yields null", () =
   }
 });
 
+test("createBufferCanvas: returns nulls when OffscreenCanvas getContext yields null", () => {
+  const previousOffscreen = globalThis.OffscreenCanvas;
+  class FakeOffscreen {
+    constructor(w, h) { this.width = w; this.height = h; }
+    getContext() { return null; }
+  }
+  globalThis.OffscreenCanvas = FakeOffscreen;
+  try {
+    const out = createBufferCanvas(
+      { scalability: { useOffscreenCanvas: true } },
+      40,
+      20,
+      1
+    );
+    assert.deepEqual(out, { canvas: null, ctx: null });
+  } finally {
+    if (previousOffscreen === undefined) delete globalThis.OffscreenCanvas;
+    else globalThis.OffscreenCanvas = previousOffscreen;
+  }
+});
+
 test("createBufferCanvas: uses OffscreenCanvas when available and enabled", () => {
   const previousOffscreen = globalThis.OffscreenCanvas;
   let constructed = null;

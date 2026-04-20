@@ -266,6 +266,12 @@ test("applyDomainOverride: only finite override values are applied", () => {
   assert.deepEqual(out, { xMin: 1, xMax: 10, yMin: 0, yMax: 99 });
 });
 
+test("applyDomainOverride: applies all four finite override values", () => {
+  const data = { xMin: 0, xMax: 10, yMin: 0, yMax: 10 };
+  const out = applyDomainOverride(data, { xMin: 1, xMax: 9, yMin: 2, yMax: 8 });
+  assert.deepEqual(out, { xMin: 1, xMax: 9, yMin: 2, yMax: 8 });
+});
+
 test("filterVisibleSeries: returns only visible:true entries", () => {
   const out = filterVisibleSeries([
     { visible: true, id: "a" },

@@ -179,6 +179,16 @@ test("ErrorBoundary.configure: partial update preserves untouched fields", () =>
   assert.strictEqual(boundary.onError, handler, "onError should not change when omitted from configure()");
 });
 
+test("ErrorBoundary.handle: swallows exceptions thrown from inside onError", () => {
+  const boundary = new ErrorBoundary({
+    enabled: true,
+    onError() { throw new Error("handler failure"); }
+  });
+  // Even though onError itself throws, handle() must not propagate the error —
+  // it logs to console.error and returns normally.
+  assert.doesNotThrow(() => boundary.handle("p", "phase", new Error("inner")));
+});
+
 test("decimatePointsStride: output length never exceeds maxPoints", () => {
   const points = Array.from({ length: 10 }, (_, i) => ({ x: i, y: i }));
 
