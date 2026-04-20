@@ -154,6 +154,137 @@ test("PluginHost.configure: before:[knownId] forces the current plugin to run fi
   assert.deepEqual(order, ["a", "b"]);
 });
 
+test("PluginHost.configure: ignores before:[unknownId] references", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  const order = [];
+  assert.doesNotThrow(() =>
+    host.configure([
+      { id: "a", before: ["does-not-exist"], install() { order.push("a"); } },
+      { id: "b", install() { order.push("b"); } }
+    ])
+  );
+  assert.equal(order.length, 2);
+});
+
+test("PluginHost.configure: non-object/non-function commands value is treated as empty map", () => {
+  // Covers the `typeof plugin.commands === "object" ? ... : {}` fallback in normalizeCommandMap.
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  assert.doesNotThrow(() =>
+    host.configure([{ id: "weird", commands: 42 }])
+  );
+  // No commands were registered.
+  assert.equal(graph.listCommands().length, 0);
+});
+
+test("PluginHost.configure: function-shaped commands() returning a non-object is treated as empty map", () => {
+  // Covers the `commands && typeof commands === "object" ? commands : {}` fallback.
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  assert.doesNotThrow(() =>
+    host.configure([{ id: "weird-fn", commands() { return null; } }])
+  );
+  assert.equal(graph.listCommands().length, 0);
+});
+
+test("PluginHost.configure: object-shaped command without metadata uses empty metadata", () => {
+  // Covers the `commandDef.metadata || {}` branch when metadata is omitted.
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  host.configure([{
+    id: "p",
+    commands: {
+      ping: { handler: () => "pong" }
+    }
+  }]);
+
+  const list = graph.listCommands();
+  assert.equal(list.length, 1);
+  assert.deepEqual(list[0].metadata, {});
+  assert.equal(graph.executeCommand("p.ping"), "pong");
+});
+
+test("PluginHost.configure: object-shaped command without a function handler is silently skipped", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  assert.doesNotThrow(() =>
+    host.configure([{
+      id: "p",
+      commands: {
+        bad: { handler: "not-a-function" },
+        also: null
+      }
+    }])
+  );
+  assert.equal(graph.listCommands().length, 0);
+});
+
+test("PluginHost.configure: { plugin, options } entry without options uses an empty options object", () => {
+  // Covers the `entry.options || {}` fallback inside normalizePluginConfig + configure.
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  let captured;
+  host.configure([
+    {
+      plugin: {
+        id: "wrapped",
+        defaults: { foo: "default-foo" },
+        install(_g, opts) { captured = opts; }
+      }
+      // no `options` key
+    }
+  ]);
+  assert.deepEqual(captured, { foo: "default-foo" });
+});
+
+test("PluginHost.configure: works when graph.options has no pluginErrorBoundary key", () => {
+  // Covers `graph.options?.pluginErrorBoundary ?? {}` fallback in the constructor.
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  graph.options = {}; // no pluginErrorBoundary key at all
+  const host = new PluginHost(graph, registry, hooks);
+
+  // Default boundary has enabled=true, so install errors are swallowed (logged,
+  // not rethrown). We just need configure() to complete without exceptions.
+  assert.doesNotThrow(() =>
+    host.configure([{ id: "boom", install() { throw new Error("nope"); } }])
+  );
+});
+
+test("PluginHost.setState: works before any state is initialized", () => {
+  // Covers the `host.pluginStates.get(pluginId) || {}` fallback inside setState
+  // by calling setState through an api retrieved before any state is seeded.
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  const api = host.getPluginApi("ghost");
+  // No prior pluginStates entry exists for "ghost"; setState should still work.
+  api.setState({ a: 1 });
+  assert.deepEqual(host.pluginStates.get("ghost"), { a: 1 });
+});
+
 test("PluginHost.configure: ignores after:[unknownId] references", () => {
   const registry = new Registry();
   const hooks = new HookRegistry();
