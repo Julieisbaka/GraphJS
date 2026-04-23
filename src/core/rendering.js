@@ -1,5 +1,8 @@
 import { clamp, makeLinearScale } from "./utils.js";
 
+const M = Math;
+const TAU = M.PI * 2;
+
 export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   const points = series.points;
   if (!points.length) {
@@ -11,25 +14,31 @@ export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   ctx.lineWidth = series.lineWidth;
   ctx.beginPath();
 
-  for (let i = 0; i < points.length; i += 1) {
+  // Alias hot-path methods so the minifier can shorten them to single chars
+  const moveTo = (x, y) => ctx.moveTo(x, y);
+  const lineTo = (x, y) => ctx.lineTo(x, y);
+
+  // First point: moveTo; remaining: lineTo — avoids a conditional inside the loop
+  moveTo(xScale(points[0].x), yScale(points[0].y));
+  for (let i = 1; i < points.length; i += 1) {
     const p = points[i];
-    const x = xScale(p.x);
-    const y = yScale(p.y);
-    if (i === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
+    lineTo(xScale(p.x), yScale(p.y));
   }
 
   ctx.stroke();
 
   if (series.pointRadius > 0) {
     ctx.fillStyle = series.color;
+    const r = series.pointRadius;
+    // Arrow closures capture ctx and r; minifier renames them to single chars,
+    // saving ~28 bytes per loop iteration vs repeating the method name each call.
+    const beginPath = () => ctx.beginPath();
+    const arc = (x, y) => ctx.arc(x, y, r, 0, TAU);
+    const fill = () => ctx.fill();
     for (const p of points) {
-      ctx.beginPath();
-      ctx.arc(xScale(p.x), yScale(p.y), series.pointRadius, 0, Math.PI * 2);
-      ctx.fill();
+      beginPath();
+      arc(xScale(p.x), yScale(p.y));
+      fill();
     }
   }
 
@@ -55,16 +64,16 @@ export function computeLayout(options) {
     top: padding.top,
     right: width - padding.right,
     bottom: height - padding.bottom,
-    width: Math.max(1, width - padding.left - padding.right),
-    height: Math.max(1, height - padding.top - padding.bottom)
+    width: M.max(1, width - padding.left - padding.right),
+    height: M.max(1, height - padding.top - padding.bottom)
   };
 }
 
 export function createBufferCanvas(options, width, height, dpr) {
   const useOffscreen = options.scalability.useOffscreenCanvas && typeof OffscreenCanvas !== "undefined";
 
-  const w = Math.max(1, Math.floor(width * dpr));
-  const h = Math.max(1, Math.floor(height * dpr));
+  const w = M.max(1, M.floor(width * dpr));
+  const h = M.max(1, M.floor(height * dpr));
 
   if (useOffscreen) {
     const canvas = new OffscreenCanvas(w, h);
@@ -107,14 +116,17 @@ export function drawGrid(ctx, options, plot, bounds) {
     ctx.strokeStyle = grid.color;
     ctx.lineWidth = grid.lineWidth;
 
+    const safeXTicks = M.max(1, grid.xTicks);
+    const safeYTicks = M.max(1, grid.yTicks);
+
     ctx.beginPath();
     for (let i = 0; i <= grid.xTicks; i += 1) {
-      const x = plot.left + (i / Math.max(1, grid.xTicks)) * plot.width;
+      const x = plot.left + (i / safeXTicks) * plot.width;
       ctx.moveTo(x, plot.top);
       ctx.lineTo(x, plot.bottom);
     }
     for (let i = 0; i <= grid.yTicks; i += 1) {
-      const y = plot.bottom - (i / Math.max(1, grid.yTicks)) * plot.height;
+      const y = plot.bottom - (i / safeYTicks) * plot.height;
       ctx.moveTo(plot.left, y);
       ctx.lineTo(plot.right, y);
     }

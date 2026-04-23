@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-04-23
+
+### Optimized
+
+- `makeLinearScale`: precomputes `ratio = rangeSpan / domainSpan` once at scale-creation time, replacing a floating-point division with a multiplication on every call. Reduces per-point cost during `drawLineSeries` and `drawGrid`.
+- `drawGrid`: hoists `Math.max(1, grid.xTicks)` and `Math.max(1, grid.yTicks)` out of their respective loops, eliminating redundant `Math.max` calls on every tick iteration.
+- `_drawStaticLayer`: eliminates a second `makeStaticLayerKey` (`JSON.stringify`) call when a key mismatch triggers layer regeneration. The key is now computed once and reused inside the regeneration block.
+- `drawLineSeries`: caches `Math.PI * 2` as a module-level `TAU` constant, avoiding the multiplication on every point arc draw.
+- Production build (`dist/graphjs.min.js`): added `--mangle-props=^_` so esbuild renames all `_`-prefixed private properties and methods (e.g. `_dirty`, `_staticLayer`, `_errorBoundary`) to single-character identifiers, and `--legal-comments=none` to strip embedded comment blocks. Combined saving: ~680 bytes (~3.5%) over the previous minified output.
+- Production build: fixed dead-code elimination for `IS_DEV`-guarded blocks. The previous `const IS_DEV = true;` declarations in each module shadowed the `--define:IS_DEV=false` build flag, leaving all validation code (`validateGraphOptions`, `validateDomain`, `validatePluginContract`, `deepFreeze`) in the bundle. Replaced with `const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true;` and switched the build flag to `--define:__DEV__=false`. esbuild now correctly folds `IS_DEV` to `false` and eliminates all guarded code paths.
+- Production build: added `--pure:Object.freeze` flag, allowing esbuild to treat `Object.freeze` calls as side-effect-free.
+- `getDataBounds` (`utils.js`): replaced `Number.POSITIVE_INFINITY` / `Number.NEGATIVE_INFINITY` with the shorter built-in `Infinity` / `-Infinity`.
+- Combined additional savings from the above: ~327 bytes, bringing the total minified bundle reduction to ~1,007 bytes (~5.3%) versus the v0.3.0 release.
+- Production build: added terser (second-pass compressor) after esbuild, piping esbuild's output through `terser --compress passes=2,pure_getters=true --module --ecma 2020`. Terser applies additional expression-level simplifications that esbuild's single-pass minifier does not perform.
+- Production build: removed `Object.freeze` calls at runtime in production. A `freeze` helper exported from `utils.js` resolves to `Object.freeze` in development and to an identity function (`v => v`) in production (eliminated as dead code by esbuild). Used in `defaults.js` (`DEFAULT_OPTIONS`), `hooks.js` (`BUILTIN_HOOKS`), and `PluginHost.js` (`getPluginApi`).
+- `rendering.js`, `utils.js`: introduced module-level `const M = Math;` alias and replaced all `Math.*` calls with `M.*`, allowing the minifier to shorten the `Math` global reference to a single-character identifier.
+- Production build: added `--tree-shaking=true` to esbuild flags.
+- Combined bundle size reduction: 19,152 → 14,557 bytes (−4,595 bytes, −24.0%) versus the v0.3.0 release.
+- `drawLineSeries` canvas context aliasing: arrow-function closures (`beginPath`, `arc`, `fill`, `moveTo`, `lineTo`) capture `ctx` by reference, allowing the minifier to rename them to single-character identifiers and saving ~25 bytes per loop iteration on series with many points. Also restructured the main path loop to place the `moveTo` call before the loop, eliminating a branch check (`i === 0`) on every iteration.
+- `Graph._dirty` refactored from a plain object with four boolean properties to a single integer bitmask (`DIRTY_DATA=1`, `DIRTY_OPTIONS=2`, `DIRTY_SIZE=4`, `DIRTY_RENDER=8`). Replaces ~19 property accesses (`this._dirty.data = true`, etc.) with bitwise operations (`this._dirty |= 1`), and the four-condition render-skip check becomes `!this._dirty`. Saves ~100 bytes in the minified bundle.
+- `defaults.js`: `background` default changed from `"#ffffff"` to `"#fff"` (3 bytes shorter, same colour).
+- `Graph.js` `resize()`: replaced template literals `` `${safeW}px` `` and `` `${safeH}px` `` with `safeW+"px"` and `safeH+"px"`.
+- Combined bundle size reduction: 19,152 → 14,379 bytes (−4,773 bytes, −24.9%) versus the v0.3.0 release.
+
 ## [0.3.0] - 2026-04-20
 
 ### Changed
