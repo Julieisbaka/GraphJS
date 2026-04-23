@@ -13,7 +13,7 @@ const M = Math;
  * Returns Object.freeze in development, or a no-op identity function in production,
  * so that Object.freeze calls are eliminated from the production bundle.
  */
-export const freeze = typeof __DEV__ !== "undefined" && __DEV__ ? Object.freeze : v => v;
+export const freeze = (typeof __DEV__ !== "undefined" ? __DEV__ : globalThis.__DEV__) ? Object.freeze : v => v;
 
 /**
  * Returns true when a value is a plain object literal.

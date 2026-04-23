@@ -163,7 +163,7 @@ export class PluginHost {
           throw new Error(`Unknown plugin: ${entry.id}`);
         }
 
-        if (__DEV__) validatePluginContract(plugin);
+        if (typeof __DEV__ === "undefined" || __DEV__) validatePluginContract(plugin);
 
         const options = deepMerge(plugin.defaults || {}, entry.options || {});
         return { plugin, options };

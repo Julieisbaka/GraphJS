@@ -75,7 +75,7 @@ export class Graph {
     }
 
     this.options = deepMerge(DEFAULT_OPTIONS, options);
-    if (__DEV__) validateGraphOptions(this.options);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateGraphOptions(this.options);
 
     this.data = [];
     this.hooks = new HookRegistry();
@@ -103,7 +103,7 @@ export class Graph {
     if ("domain" in nextOptions) {
       this.options.domain = nextOptions.domain ?? null;
     }
-    if (__DEV__) validateGraphOptions(this.options);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateGraphOptions(this.options);
 
     if ("pluginErrorBoundary" in nextOptions) {
       this.plugins.configureErrorBoundary(this.options.pluginErrorBoundary);
@@ -130,7 +130,7 @@ export class Graph {
   }
 
   setDomain(domain = null) {
-    if (__DEV__) validateDomain(domain);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateDomain(domain);
     this.options.domain = domain;
     this._dirty |= DIRTY_OPTIONS | DIRTY_RENDER;
     return this;
@@ -201,7 +201,7 @@ export class Graph {
     }
 
     const normalized = normalizeSeriesData(payload.nextData, this.options.series || {});
-    this.data = this.options.immutableInputs && __DEV__ ? deepFreeze(normalized) : normalized;
+    this.data = this.options.immutableInputs && (typeof __DEV__ === "undefined" || __DEV__) ? deepFreeze(normalized) : normalized;
 
     this._dirty |= DIRTY_DATA | DIRTY_RENDER;
     this.plugins.call("afterSetData", { data: this.data });
@@ -247,7 +247,7 @@ export class Graph {
       return this._boundsStrategy(dataBounds, this.options);
     }
     const resolved = applyDomainOverride(dataBounds, this.options.domain);
-    if (__DEV__) validateDomain(resolved);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateDomain(resolved);
     return resolved;
   }
 

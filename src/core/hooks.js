@@ -23,7 +23,7 @@ export class HookRegistry {
   }
 
   register(hookName) {
-    if (__DEV__) {
+    if (typeof __DEV__ === "undefined" || __DEV__) {
       if (typeof hookName !== "string" || !hookName.trim()) {
         throw new Error("Hook name must be a non-empty string.");
       }
