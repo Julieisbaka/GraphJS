@@ -1,8 +1,11 @@
-// Default __DEV__ to true (development mode) in environments where the bundler
-// has not defined it (e.g. direct Node.js execution during tests or development).
-// In production builds esbuild replaces every bare __DEV__ reference with false via
-// --define:__DEV__=false, so this branch is never taken in the minified bundle.
-if (typeof globalThis.__DEV__ === "undefined") globalThis.__DEV__ = true;
+// Default __DEV__ to true (development mode) only in environments where the
+// bundler has not defined the bare __DEV__ symbol (for example, direct Node.js
+// execution during tests or development). In production builds esbuild replaces
+// every bare __DEV__ reference with false via --define:__DEV__=false, so this
+// fallback is skipped and does not mutate global state in the minified bundle.
+if (typeof __DEV__ === "undefined" && typeof globalThis.__DEV__ === "undefined") {
+  globalThis.__DEV__ = true;
+}
 
 const M = Math;
 
