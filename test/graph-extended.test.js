@@ -332,6 +332,59 @@ test("Graph.render: returning false from beforeLayout/beforeRender short-circuit
   assert.equal(stub.calls.stroke, before, "no series drawn when beforeRender returns false");
 });
 
+test("Graph.render: beforeLayout fires before _computeLayout and plugin can override layout", () => {
+  let computeLayoutCalled = false;
+  let capturedPayloadAtHookTime = null;
+  const customLayout = {
+    left: 5,
+    right: 195,
+    top: 5,
+    bottom: 195,
+    width: 190,
+    height: 190
+  };
+
+  const { graph } = createGraph({
+    width: 200,
+    height: 200,
+    scalability: { dirtyRender: false, layerCaching: false, useOffscreenCanvas: false },
+    plugins: [
+      {
+        plugin: {
+          id: "layout-override-test-plugin",
+          hooks: {
+            beforeLayout(_graph, ctx) {
+              capturedPayloadAtHookTime = { computeLayoutCalledBeforeHook: computeLayoutCalled };
+              ctx.layout = customLayout;
+            }
+          }
+        }
+      }
+    ]
+  });
+
+  const originalCompute = graph._computeLayout.bind(graph);
+  graph._computeLayout = () => {
+    computeLayoutCalled = true;
+    return originalCompute();
+  };
+
+  graph.setData([{ points: [{ x: 0, y: 0 }, { x: 1, y: 1 }] }]);
+  graph.render({ force: true });
+
+  assert.ok(capturedPayloadAtHookTime !== null, "beforeLayout hook was called");
+  assert.equal(
+    capturedPayloadAtHookTime.computeLayoutCalledBeforeHook,
+    false,
+    "beforeLayout fires before _computeLayout"
+  );
+  assert.equal(
+    computeLayoutCalled,
+    false,
+    "_computeLayout is skipped when plugin provides ctx.layout"
+  );
+});
+
 test("Graph.render: falls back to direct draw when layer caching is on but no canvas backend exists", () => {
   // No global `document` and no `OffscreenCanvas` → createBufferCanvas returns
   // {canvas: null, ctx: null}, so _drawStaticLayer must fall through to

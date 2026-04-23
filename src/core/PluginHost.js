@@ -266,13 +266,10 @@ export class PluginHost {
       return true;
     }
 
-    const hookContext = {
-      ...context,
-      hookName
-    };
+    context.hookName = hookName;
 
     for (const { plugin, options } of this.plugins) {
-      if (!this._pluginCanRunForHook(plugin, hookName, hookContext)) {
+      if (!this._pluginCanRunForHook(plugin, hookName, context)) {
         continue;
       }
 
@@ -284,9 +281,9 @@ export class PluginHost {
 
       let result = true;
       try {
-        result = method.call(plugin, this.graph, hookContext, options, this.getPluginApi(plugin.id));
+        result = method.call(plugin, this.graph, context, options, this.getPluginApi(plugin.id));
       } catch (error) {
-        this._handlePluginError(plugin, `hook:${hookName}`, error, hookContext);
+        this._handlePluginError(plugin, `hook:${hookName}`, error, context);
         continue;
       }
 
