@@ -20,6 +20,11 @@ All notable changes to this project will be documented in this file.
 - `rendering.js`, `utils.js`: introduced module-level `const M = Math;` alias and replaced all `Math.*` calls with `M.*`, allowing the minifier to shorten the `Math` global reference to a single-character identifier.
 - Production build: added `--tree-shaking=true` to esbuild flags.
 - Combined bundle size reduction: 19,152 → 14,557 bytes (−4,595 bytes, −24.0%) versus the v0.3.0 release.
+- `drawLineSeries` canvas context aliasing: arrow-function closures (`beginPath`, `arc`, `fill`, `moveTo`, `lineTo`) capture `ctx` by reference, allowing the minifier to rename them to single-character identifiers and saving ~25 bytes per loop iteration on series with many points. Also restructured the main path loop to place the `moveTo` call before the loop, eliminating a branch check (`i === 0`) on every iteration.
+- `Graph._dirty` refactored from a plain object with four boolean properties to a single integer bitmask (`DIRTY_DATA=1`, `DIRTY_OPTIONS=2`, `DIRTY_SIZE=4`, `DIRTY_RENDER=8`). Replaces ~19 property accesses (`this._dirty.data = true`, etc.) with bitwise operations (`this._dirty |= 1`), and the four-condition render-skip check becomes `!this._dirty`. Saves ~100 bytes in the minified bundle.
+- `defaults.js`: `background` default changed from `"#ffffff"` to `"#fff"` (3 bytes shorter, same colour).
+- `Graph.js` `resize()`: replaced template literals `` `${safeW}px` `` and `` `${safeH}px` `` with `safeW+"px"` and `safeH+"px"`.
+- Combined bundle size reduction: 19,152 → 14,379 bytes (−4,773 bytes, −24.9%) versus the v0.3.0 release.
 
 ## [0.3.0] - 2026-04-20
 

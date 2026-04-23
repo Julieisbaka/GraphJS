@@ -26,6 +26,14 @@ import { validateDomain, validateGraphOptions } from "./validation.js";
 
 const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
 
+// Bitmask flags for this._dirty — collapsed to a single integer so esbuild/terser
+// can reduce all checks and resets to bitwise operations instead of property accesses.
+const DIRTY_DATA = 1;
+const DIRTY_OPTIONS = 2;
+const DIRTY_SIZE = 4;
+const DIRTY_RENDER = 8;
+const DIRTY_ALL = 15;
+
 export { drawLineSeries } from "./rendering.js";
 
 export class Graph {
@@ -76,12 +84,7 @@ export class Graph {
     this.plugins = new PluginHost(this, Graph.registry, this.hooks);
     this.commands = new Map();
 
-    this._dirty = {
-      data: true,
-      options: true,
-      size: true,
-      render: true
-    };
+    this._dirty = DIRTY_ALL;
     this._staticLayer = {
       canvas: null,
       ctx: null,
@@ -112,8 +115,7 @@ export class Graph {
       this.plugins.configure(nextOptions.plugins);
     }
 
-    this._dirty.options = true;
-    this._dirty.render = true;
+    this._dirty |= DIRTY_OPTIONS | DIRTY_RENDER;
     return this;
   }
 
@@ -132,8 +134,7 @@ export class Graph {
   setDomain(domain = null) {
     if (IS_DEV) validateDomain(domain);
     this.options.domain = domain;
-    this._dirty.options = true;
-    this._dirty.render = true;
+    this._dirty |= DIRTY_OPTIONS | DIRTY_RENDER;
     return this;
   }
 
@@ -204,8 +205,7 @@ export class Graph {
     const normalized = normalizeSeriesData(payload.nextData, this.options.series || {});
     this.data = this.options.immutableInputs && IS_DEV ? deepFreeze(normalized) : normalized;
 
-    this._dirty.data = true;
-    this._dirty.render = true;
+    this._dirty |= DIRTY_DATA | DIRTY_RENDER;
     this.plugins.call("afterSetData", { data: this.data });
     return this;
   }
@@ -231,15 +231,14 @@ export class Graph {
 
     this.canvas.width = Math.floor(safeW * dpr);
     this.canvas.height = Math.floor(safeH * dpr);
-    this.canvas.style.width = `${safeW}px`;
-    this.canvas.style.height = `${safeH}px`;
+    this.canvas.style.width = safeW + "px";
+    this.canvas.style.height = safeH + "px";
 
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.options.width = safeW;
     this.options.height = safeH;
 
-    this._dirty.size = true;
-    this._dirty.render = true;
+    this._dirty |= DIRTY_SIZE | DIRTY_RENDER;
 
     this.plugins.call("afterResize", { width: safeW, height: safeH, dpr });
     return this;
@@ -291,7 +290,7 @@ export class Graph {
 
     // Skip JSON.stringify on frames where dirty flags already mandate regeneration;
     // only compute the key on clean frames to catch silent option mutations.
-    const dirtyRegen = !this._staticLayer.canvas || this._dirty.options || this._dirty.size || this._dirty.data;
+    const dirtyRegen = !this._staticLayer.canvas || !!(this._dirty & (DIRTY_OPTIONS | DIRTY_SIZE | DIRTY_DATA));
     const currentKey = dirtyRegen ? null : makeStaticLayerKey(this.options, plot, bounds);
     if (dirtyRegen || currentKey !== this._staticLayer.key) {
       const key = currentKey ?? makeStaticLayerKey(this.options, plot, bounds);
@@ -326,10 +325,7 @@ export class Graph {
     if (
       this.options.scalability.dirtyRender &&
       !force &&
-      !this._dirty.data &&
-      !this._dirty.options &&
-      !this._dirty.size &&
-      !this._dirty.render
+      !this._dirty
     ) {
       return this;
     }
@@ -376,10 +372,7 @@ export class Graph {
 
     this.plugins.call("afterRender", { layout: plot, bounds });
 
-    this._dirty.data = false;
-    this._dirty.options = false;
-    this._dirty.size = false;
-    this._dirty.render = false;
+    this._dirty = 0;
 
     return this;
   }

@@ -83,13 +83,13 @@ test("Graph constructor: applies provided options on top of defaults", () => {
 
 test("Graph.setData: normalizes input and toggles dirty flags", () => {
   const { graph } = createGraph();
-  graph._dirty.data = false;
-  graph._dirty.render = false;
+  graph._dirty &= ~1;  // clear DIRTY_DATA
+  graph._dirty &= ~8;  // clear DIRTY_RENDER
   graph.setData([{ id: "s1", points: [{ x: 0, y: 0 }, { x: 1, y: 2 }] }]);
   assert.equal(graph.data.length, 1);
   assert.equal(graph.data[0].id, "s1");
-  assert.equal(graph._dirty.data, true);
-  assert.equal(graph._dirty.render, true);
+  assert.ok(graph._dirty & 1, "DIRTY_DATA bit should be set");
+  assert.ok(graph._dirty & 8, "DIRTY_RENDER bit should be set");
 });
 
 test("Graph.setData: returning false from beforeSetData short-circuits", () => {
@@ -258,10 +258,7 @@ test("Graph.render: completes a full pipeline and clears dirty flags", () => {
   graph.setData([{ id: "s", points: [{ x: 0, y: 0 }, { x: 1, y: 1 }] }]);
   const result = graph.render();
   assert.strictEqual(result, graph);
-  assert.equal(graph._dirty.data, false);
-  assert.equal(graph._dirty.options, false);
-  assert.equal(graph._dirty.size, false);
-  assert.equal(graph._dirty.render, false);
+  assert.equal(graph._dirty, 0, "all dirty bits should be cleared after render");
   assert.ok(stub.calls.stroke > 0, "line series was drawn");
 
   // Subsequent render with no dirty flags is a no-op

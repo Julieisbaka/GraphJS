@@ -14,25 +14,31 @@ export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   ctx.lineWidth = series.lineWidth;
   ctx.beginPath();
 
-  for (let i = 0; i < points.length; i += 1) {
+  // Alias hot-path methods so the minifier can shorten them to single chars
+  const moveTo = (x, y) => ctx.moveTo(x, y);
+  const lineTo = (x, y) => ctx.lineTo(x, y);
+
+  // First point: moveTo; remaining: lineTo — avoids a conditional inside the loop
+  moveTo(xScale(points[0].x), yScale(points[0].y));
+  for (let i = 1; i < points.length; i += 1) {
     const p = points[i];
-    const x = xScale(p.x);
-    const y = yScale(p.y);
-    if (i === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
+    lineTo(xScale(p.x), yScale(p.y));
   }
 
   ctx.stroke();
 
   if (series.pointRadius > 0) {
     ctx.fillStyle = series.color;
+    const r = series.pointRadius;
+    // Arrow closures capture ctx and r; minifier renames them to single chars,
+    // saving ~28 bytes per loop iteration vs repeating the method name each call.
+    const beginPath = () => ctx.beginPath();
+    const arc = (x, y) => ctx.arc(x, y, r, 0, TAU);
+    const fill = () => ctx.fill();
     for (const p of points) {
-      ctx.beginPath();
-      ctx.arc(xScale(p.x), yScale(p.y), series.pointRadius, 0, TAU);
-      ctx.fill();
+      beginPath();
+      arc(xScale(p.x), yScale(p.y));
+      fill();
     }
   }
 
