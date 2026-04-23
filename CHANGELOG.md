@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 - `_drawStaticLayer`: eliminates a second `makeStaticLayerKey` (`JSON.stringify`) call when a key mismatch triggers layer regeneration. The key is now computed once and reused inside the regeneration block.
 - `drawLineSeries`: caches `Math.PI * 2` as a module-level `TAU` constant, avoiding the multiplication on every point arc draw.
 - Production build (`dist/graphjs.min.js`): added `--mangle-props=^_` so esbuild renames all `_`-prefixed private properties and methods (e.g. `_dirty`, `_staticLayer`, `_errorBoundary`) to single-character identifiers, and `--legal-comments=none` to strip embedded comment blocks. Combined saving: ~680 bytes (~3.5%) over the previous minified output.
+- Production build: fixed dead-code elimination for `IS_DEV`-guarded blocks. The previous `const IS_DEV = true;` declarations in each module shadowed the `--define:IS_DEV=false` build flag, leaving all validation code (`validateGraphOptions`, `validateDomain`, `validatePluginContract`, `deepFreeze`) in the bundle. Replaced with `const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true;` and switched the build flag to `--define:__DEV__=false`. esbuild now correctly folds `IS_DEV` to `false` and eliminates all guarded code paths.
+- Production build: added `--pure:Object.freeze` flag, allowing esbuild to treat `Object.freeze` calls as side-effect-free.
+- `getDataBounds` (`utils.js`): replaced `Number.POSITIVE_INFINITY` / `Number.NEGATIVE_INFINITY` with the shorter built-in `Infinity` / `-Infinity`.
+- Combined additional savings from the above: ~327 bytes, bringing the total minified bundle reduction to ~1,007 bytes (~5.3%) versus the v0.3.0 release.
 
 ## [0.3.0] - 2026-04-20
 

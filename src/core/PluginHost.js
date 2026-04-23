@@ -2,7 +2,7 @@ import { deepMerge } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 
-const IS_DEV = true; // replaced with false at build time via --define:IS_DEV=false
+const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
 
 function getPluginPriority(plugin) {
   return Number.isFinite(plugin.priority) ? plugin.priority : 0;

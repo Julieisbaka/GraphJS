@@ -24,7 +24,7 @@ import {
 } from "./utils.js";
 import { validateDomain, validateGraphOptions } from "./validation.js";
 
-const IS_DEV = true; // replaced with false at build time via --define:IS_DEV=false
+const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
 
 export { drawLineSeries } from "./rendering.js";
 

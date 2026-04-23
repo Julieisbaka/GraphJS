@@ -117,10 +117,10 @@ export function normalizeSeriesData(rawData, seriesDefaults = {}) {
  */
 export function getDataBounds(seriesList) {
   const bounds = {
-    xMin: Number.POSITIVE_INFINITY,
-    xMax: Number.NEGATIVE_INFINITY,
-    yMin: Number.POSITIVE_INFINITY,
-    yMax: Number.NEGATIVE_INFINITY
+    xMin: Infinity,
+    xMax: -Infinity,
+    yMin: Infinity,
+    yMax: -Infinity
   };
 
   for (const s of seriesList) {

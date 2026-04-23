@@ -35,7 +35,7 @@
   "scripts": {
     "lint": "node --check src/index.js src/core/*.js",
     "test": "node --test \"test/*.test.js\"",
-    "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.prod.js --bundle --format=esm --minify --define:IS_DEV=false --mangle-props=^_ --legal-comments=none --outfile=dist/graphjs.min.js"
+    "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.prod.js --bundle --format=esm --minify --define:__DEV__=false --mangle-props=^_ --legal-comments=none --pure:Object.freeze --outfile=dist/graphjs.min.js"
   },
   "devDependencies": {
     "c8": "^10.1.3",
