@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - `drawGrid`: hoists `Math.max(1, grid.xTicks)` and `Math.max(1, grid.yTicks)` out of their respective loops, eliminating redundant `Math.max` calls on every tick iteration.
 - `_drawStaticLayer`: eliminates a second `makeStaticLayerKey` (`JSON.stringify`) call when a key mismatch triggers layer regeneration. The key is now computed once and reused inside the regeneration block.
 - `drawLineSeries`: caches `Math.PI * 2` as a module-level `TAU` constant, avoiding the multiplication on every point arc draw.
+- Production build (`dist/graphjs.min.js`): added `--mangle-props=^_` so esbuild renames all `_`-prefixed private properties and methods (e.g. `_dirty`, `_staticLayer`, `_errorBoundary`) to single-character identifiers, and `--legal-comments=none` to strip embedded comment blocks. Combined saving: ~680 bytes (~3.5%) over the previous minified output.
 
 ## [0.3.0] - 2026-04-20
 
