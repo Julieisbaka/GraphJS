@@ -2,18 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.2] - 2026-04-23
+## [0.3.3] - 2026-04-23
 
 ### Fixed
 
 - **Dead-code elimination now works correctly for `__DEV__`-guarded blocks.** The previous pattern used a local `const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true;` in every module (`Graph.js`, `PluginHost.js`, `hooks.js`, `Registry.js`). Although esbuild could theoretically constant-fold this after replacing `__DEV__` with `false`, the intermediate local variable prevented reliable elimination in practice, leaving validation logic, error strings, and `deepFreeze` in the production bundle and causing the minified size to remain at ~18.6 kb. All local `IS_DEV` declarations have been removed. Each file now uses the build-time global `__DEV__` directly (`if (__DEV__) { ... }`), which esbuild folds to `if (false) { ... }` and completely eliminates.
-- **`utils.js` initialises `__DEV__` as a fallback for unbundled environments.** A one-time guard (`if (typeof globalThis.__DEV__ === "undefined") globalThis.__DEV__ = true;`) ensures that `__DEV__` resolves to `true` when the source is executed directly (Node.js tests, development imports) without esbuild replacing it. In production builds the guard is present but harmless — every bare `__DEV__` reference has already been replaced with `false` at compile time.
+- **`utils.js` initialises `__DEV__` as a fallback for unbundled environments.** A one-time guard (`if (typeof __DEV__ === "undefined" && typeof globalThis.__DEV__ === "undefined") { globalThis.__DEV__ = true; }`) ensures that `__DEV__` resolves to `true` when the source is executed directly (Node.js tests, development imports) without esbuild replacing it. In production builds, every bare `__DEV__` reference has already been replaced with `false` at compile time, so the guard never runs.
 - **`freeze` helper updated to match the standardised `__DEV__` check.** `export const freeze = typeof __DEV__ !== "undefined" && __DEV__ ? Object.freeze : v => v;` is now the canonical form, consistent with esbuild constant-folding `typeof false !== "undefined" && false` → `false`.
+- **`Registry.js` guard updated to `typeof __DEV__ === "undefined" || __DEV__`** to avoid a `ReferenceError` when `Registry` is imported in isolation (without `utils.js`).
 
 ### Optimized
 
 - **Build script:** added `--pure:Object.freeze` to the esbuild invocation so esbuild treats every `Object.freeze(...)` call as side-effect-free and removes them when the result is unused.
 - **Build script:** increased terser compression to `passes=3` (from `passes=2`) and added `unsafe=true` and `--mangle` flags for additional expression-level simplifications and property name shortening.
+
+## [0.3.2] - 2026-04-23
+
+### Changed
+
+- `Graph.render()`: `beforeLayout` hook now fires **before** `_computeLayout()` is called, matching its name's intent. Plugins can inspect or cancel the layout phase before any computation occurs. A plugin may also supply a custom layout by setting `payload.layout` in the hook — when present, `_computeLayout()` is skipped entirely, allowing plugins (e.g. bar charts, pie charts) to take over layout without the core needing to know.
+- `BeforeLayoutHookContext` (`src/index.d.ts`): `layout` is now typed as optional (`layout?: PlotLayout`) since the hook fires before layout computation.
 
 ## [0.3.1] - 2026-04-23
 

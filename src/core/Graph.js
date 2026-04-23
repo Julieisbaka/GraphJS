@@ -328,14 +328,13 @@ export class Graph {
       return this;
     }
 
-    const layout = this._computeLayout();
-    const payload = { layout };
-
+    const payload = {};
     if (this.plugins.call("beforeLayout", payload) === false) {
       return this;
     }
 
-    const plot = payload.layout;
+    const layout = payload.layout ?? this._computeLayout();
+    const plot = layout;
     const rawBounds = getDataBounds(filterVisibleSeries(this.data));
     const bounds = this._resolveBounds(rawBounds);
 
