@@ -333,19 +333,7 @@ test("Graph.render: returning false from beforeLayout/beforeRender short-circuit
 });
 
 test("Graph.render: beforeLayout fires before _computeLayout and plugin can override layout", () => {
-  const { graph } = createGraph({
-    width: 200,
-    height: 200,
-    scalability: { dirtyRender: false, layerCaching: false, useOffscreenCanvas: false }
-  });
-
   let computeLayoutCalled = false;
-  const originalCompute = graph._computeLayout.bind(graph);
-  graph._computeLayout = () => {
-    computeLayoutCalled = true;
-    return originalCompute();
-  };
-
   let capturedPayloadAtHookTime = null;
   const customLayout = {
     left: 5,
@@ -356,17 +344,30 @@ test("Graph.render: beforeLayout fires before _computeLayout and plugin can over
     height: 190
   };
 
-  graph.plugins.configure([
-    {
-      name: "layout-override-test-plugin",
-      beforeLayout(payload) {
-        // Verify _computeLayout has NOT been called yet
-        capturedPayloadAtHookTime = { computeLayoutCalledBeforeHook: computeLayoutCalled };
-        // Plugin overrides the layout
-        payload.layout = customLayout;
+  const { graph } = createGraph({
+    width: 200,
+    height: 200,
+    scalability: { dirtyRender: false, layerCaching: false, useOffscreenCanvas: false },
+    plugins: [
+      {
+        plugin: {
+          id: "layout-override-test-plugin",
+          hooks: {
+            beforeLayout(_graph, ctx) {
+              capturedPayloadAtHookTime = { computeLayoutCalledBeforeHook: computeLayoutCalled };
+              ctx.layout = customLayout;
+            }
+          }
+        }
       }
-    }
-  ]);
+    ]
+  });
+
+  const originalCompute = graph._computeLayout.bind(graph);
+  graph._computeLayout = () => {
+    computeLayoutCalled = true;
+    return originalCompute();
+  };
 
   graph.setData([{ points: [{ x: 0, y: 0 }, { x: 1, y: 1 }] }]);
   graph.render({ force: true });
@@ -380,7 +381,7 @@ test("Graph.render: beforeLayout fires before _computeLayout and plugin can over
   assert.equal(
     computeLayoutCalled,
     false,
-    "_computeLayout is skipped when plugin provides payload.layout"
+    "_computeLayout is skipped when plugin provides ctx.layout"
   );
 });
 
