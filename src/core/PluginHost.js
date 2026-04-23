@@ -1,4 +1,4 @@
-import { deepMerge } from "./utils.js";
+import { deepMerge, freeze } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 
@@ -219,7 +219,7 @@ export class PluginHost {
 
   getPluginApi(pluginId) {
     const host = this;
-    return Object.freeze({
+    return freeze({
       id: pluginId,
       getPluginState(id = pluginId) {
         return host.pluginStates.get(id);

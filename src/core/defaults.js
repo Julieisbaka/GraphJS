@@ -1,4 +1,6 @@
-export const DEFAULT_OPTIONS = Object.freeze({
+import { freeze } from "./utils.js";
+
+export const DEFAULT_OPTIONS = freeze({
   width: 640,
   height: 360,
   background: "#ffffff",

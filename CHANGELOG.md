@@ -15,6 +15,11 @@ All notable changes to this project will be documented in this file.
 - Production build: added `--pure:Object.freeze` flag, allowing esbuild to treat `Object.freeze` calls as side-effect-free.
 - `getDataBounds` (`utils.js`): replaced `Number.POSITIVE_INFINITY` / `Number.NEGATIVE_INFINITY` with the shorter built-in `Infinity` / `-Infinity`.
 - Combined additional savings from the above: ~327 bytes, bringing the total minified bundle reduction to ~1,007 bytes (~5.3%) versus the v0.3.0 release.
+- Production build: added terser (second-pass compressor) after esbuild, piping esbuild's output through `terser --compress passes=2,pure_getters=true --module --ecma 2020`. Terser applies additional expression-level simplifications that esbuild's single-pass minifier does not perform.
+- Production build: removed `Object.freeze` calls at runtime in production. A `freeze` helper exported from `utils.js` resolves to `Object.freeze` in development and to an identity function (`v => v`) in production (eliminated as dead code by esbuild). Used in `defaults.js` (`DEFAULT_OPTIONS`), `hooks.js` (`BUILTIN_HOOKS`), and `PluginHost.js` (`getPluginApi`).
+- `rendering.js`, `utils.js`: introduced module-level `const M = Math;` alias and replaced all `Math.*` calls with `M.*`, allowing the minifier to shorten the `Math` global reference to a single-character identifier.
+- Production build: added `--tree-shaking=true` to esbuild flags.
+- Combined bundle size reduction: 19,152 → 14,557 bytes (−4,595 bytes, −24.0%) versus the v0.3.0 release.
 
 ## [0.3.0] - 2026-04-20
 

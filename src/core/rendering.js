@@ -1,6 +1,7 @@
 import { clamp, makeLinearScale } from "./utils.js";
 
-const TAU = Math.PI * 2;
+const M = Math;
+const TAU = M.PI * 2;
 
 export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   const points = series.points;
@@ -57,16 +58,16 @@ export function computeLayout(options) {
     top: padding.top,
     right: width - padding.right,
     bottom: height - padding.bottom,
-    width: Math.max(1, width - padding.left - padding.right),
-    height: Math.max(1, height - padding.top - padding.bottom)
+    width: M.max(1, width - padding.left - padding.right),
+    height: M.max(1, height - padding.top - padding.bottom)
   };
 }
 
 export function createBufferCanvas(options, width, height, dpr) {
   const useOffscreen = options.scalability.useOffscreenCanvas && typeof OffscreenCanvas !== "undefined";
 
-  const w = Math.max(1, Math.floor(width * dpr));
-  const h = Math.max(1, Math.floor(height * dpr));
+  const w = M.max(1, M.floor(width * dpr));
+  const h = M.max(1, M.floor(height * dpr));
 
   if (useOffscreen) {
     const canvas = new OffscreenCanvas(w, h);
@@ -109,8 +110,8 @@ export function drawGrid(ctx, options, plot, bounds) {
     ctx.strokeStyle = grid.color;
     ctx.lineWidth = grid.lineWidth;
 
-    const safeXTicks = Math.max(1, grid.xTicks);
-    const safeYTicks = Math.max(1, grid.yTicks);
+    const safeXTicks = M.max(1, grid.xTicks);
+    const safeYTicks = M.max(1, grid.yTicks);
 
     ctx.beginPath();
     for (let i = 0; i <= grid.xTicks; i += 1) {

@@ -29,16 +29,17 @@
     "zero-dependency"
   ],
   "license": "MIT",
-    "engines": {
-      "node": ">=22"
-    },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "lint": "node --check src/index.js src/core/*.js",
     "test": "node --test \"test/*.test.js\"",
-    "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.prod.js --bundle --format=esm --minify --define:__DEV__=false --mangle-props=^_ --legal-comments=none --pure:Object.freeze --outfile=dist/graphjs.min.js"
+    "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.prod.js --bundle --format=esm --minify --define:__DEV__=false --mangle-props=^_ --legal-comments=none --tree-shaking=true | terser --compress passes=2,pure_getters=true --module --ecma 2020 -o dist/graphjs.min.js"
   },
   "devDependencies": {
     "c8": "^10.1.3",
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.25.0",
+    "terser": "^5.46.2"
   }
 }

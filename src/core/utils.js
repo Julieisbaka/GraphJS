@@ -1,3 +1,13 @@
+const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
+
+const M = Math;
+
+/**
+ * Returns Object.freeze in development, or a no-op identity function in production,
+ * so that Object.freeze calls are eliminated from the production bundle.
+ */
+export const freeze = IS_DEV ? Object.freeze : v => v;
+
 /**
  * Returns true when a value is a plain object literal.
  *
@@ -45,7 +55,7 @@ export function deepMerge(target = {}, source = {}) {
  * @returns {number} Clamped value.
  */
 export function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
+  return M.max(min, M.min(max, value));
 }
 
 /**
@@ -128,10 +138,10 @@ export function getDataBounds(seriesList) {
       if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) {
         continue;
       }
-      bounds.xMin = Math.min(bounds.xMin, p.x);
-      bounds.xMax = Math.max(bounds.xMax, p.x);
-      bounds.yMin = Math.min(bounds.yMin, p.y);
-      bounds.yMax = Math.max(bounds.yMax, p.y);
+      bounds.xMin = M.min(bounds.xMin, p.x);
+      bounds.xMax = M.max(bounds.xMax, p.x);
+      bounds.yMin = M.min(bounds.yMin, p.y);
+      bounds.yMax = M.max(bounds.yMax, p.y);
     }
   }
 
@@ -185,7 +195,7 @@ export function decimatePointsStride(points, maxPoints) {
     return points;
   }
 
-  const stride = Math.ceil(points.length / Math.max(1, maxPoints));
+  const stride = M.ceil(points.length / M.max(1, maxPoints));
   const last = points[points.length - 1];
   const out = [];
   for (let i = 0; i < points.length; i += stride) {
@@ -244,10 +254,10 @@ export function invertLinearScale(px, domainMin, domainMax, rangeMin, rangeMax) 
 export function clampBounds(view, full) {
   const spanX = view.xMax - view.xMin;
   const spanY = view.yMax - view.yMin;
-  const maxOffsetX = Math.max(0, full.xMax - full.xMin - spanX);
-  const maxOffsetY = Math.max(0, full.yMax - full.yMin - spanY);
-  const offsetX = Math.max(0, Math.min(view.xMin - full.xMin, maxOffsetX));
-  const offsetY = Math.max(0, Math.min(view.yMin - full.yMin, maxOffsetY));
+  const maxOffsetX = M.max(0, full.xMax - full.xMin - spanX);
+  const maxOffsetY = M.max(0, full.yMax - full.yMin - spanY);
+  const offsetX = M.max(0, M.min(view.xMin - full.xMin, maxOffsetX));
+  const offsetY = M.max(0, M.min(view.yMin - full.yMin, maxOffsetY));
   return {
     xMin: full.xMin + offsetX,
     xMax: full.xMin + offsetX + spanX,

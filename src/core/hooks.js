@@ -1,6 +1,8 @@
+import { freeze } from "./utils.js";
+
 const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
 
-export const BUILTIN_HOOKS = Object.freeze([
+export const BUILTIN_HOOKS = freeze([
   "beforeInit",
   "afterInit",
   "beforeSetData",
