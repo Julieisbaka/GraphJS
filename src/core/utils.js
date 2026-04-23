@@ -213,7 +213,8 @@ export function decimatePointsStride(points, maxPoints) {
 export function makeLinearScale(domainMin, domainMax, rangeMin, rangeMax) {
   const domainSpan = domainMax - domainMin;
   const rangeSpan = rangeMax - rangeMin;
-  return (value) => rangeMin + ((value - domainMin) / domainSpan) * rangeSpan;
+  const ratio = rangeSpan / domainSpan;
+  return (value) => rangeMin + (value - domainMin) * ratio;
 }
 
 /**

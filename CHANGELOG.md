@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-04-23
+
+### Optimized
+
+- `makeLinearScale`: precomputes `ratio = rangeSpan / domainSpan` once at scale-creation time, replacing a floating-point division with a multiplication on every call. Reduces per-point cost during `drawLineSeries` and `drawGrid`.
+- `drawGrid`: hoists `Math.max(1, grid.xTicks)` and `Math.max(1, grid.yTicks)` out of their respective loops, eliminating redundant `Math.max` calls on every tick iteration.
+- `_drawStaticLayer`: eliminates a second `makeStaticLayerKey` (`JSON.stringify`) call when a key mismatch triggers layer regeneration. The key is now computed once and reused inside the regeneration block.
+- `drawLineSeries`: caches `Math.PI * 2` as a module-level `TAU` constant, avoiding the multiplication on every point arc draw.
+
 ## [0.3.0] - 2026-04-20
 
 ### Changed

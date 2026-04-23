@@ -1,5 +1,7 @@
 import { clamp, makeLinearScale } from "./utils.js";
 
+const TAU = Math.PI * 2;
+
 export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   const points = series.points;
   if (!points.length) {
@@ -28,7 +30,7 @@ export function drawLineSeries(ctx, plot, series, xScale, yScale) {
     ctx.fillStyle = series.color;
     for (const p of points) {
       ctx.beginPath();
-      ctx.arc(xScale(p.x), yScale(p.y), series.pointRadius, 0, Math.PI * 2);
+      ctx.arc(xScale(p.x), yScale(p.y), series.pointRadius, 0, TAU);
       ctx.fill();
     }
   }
@@ -107,14 +109,17 @@ export function drawGrid(ctx, options, plot, bounds) {
     ctx.strokeStyle = grid.color;
     ctx.lineWidth = grid.lineWidth;
 
+    const safeXTicks = Math.max(1, grid.xTicks);
+    const safeYTicks = Math.max(1, grid.yTicks);
+
     ctx.beginPath();
     for (let i = 0; i <= grid.xTicks; i += 1) {
-      const x = plot.left + (i / Math.max(1, grid.xTicks)) * plot.width;
+      const x = plot.left + (i / safeXTicks) * plot.width;
       ctx.moveTo(x, plot.top);
       ctx.lineTo(x, plot.bottom);
     }
     for (let i = 0; i <= grid.yTicks; i += 1) {
-      const y = plot.bottom - (i / Math.max(1, grid.yTicks)) * plot.height;
+      const y = plot.bottom - (i / safeYTicks) * plot.height;
       ctx.moveTo(plot.left, y);
       ctx.lineTo(plot.right, y);
     }
