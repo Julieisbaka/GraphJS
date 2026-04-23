@@ -347,7 +347,14 @@ test("Graph.render: beforeLayout fires before _computeLayout and plugin can over
   };
 
   let capturedPayloadAtHookTime = null;
-  const customLayout = { left: 5, right: 195, top: 5, bottom: 195 };
+  const customLayout = {
+    left: 5,
+    right: 195,
+    top: 5,
+    bottom: 195,
+    width: 190,
+    height: 190
+  };
 
   graph.plugins.call = (name, payload) => {
     if (name === "beforeLayout") {
