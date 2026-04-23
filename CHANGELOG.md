@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2026-04-23
+
+### Changed
+
+- `Graph.render()`: `beforeLayout` hook now fires **before** `_computeLayout()` is called, matching its name's intent. Plugins can inspect or cancel the layout phase before any computation occurs. A plugin may also supply a custom layout by setting `payload.layout` in the hook — when present, `_computeLayout()` is skipped entirely, allowing plugins (e.g. bar charts, pie charts) to take over layout without the core needing to know.
+- `BeforeLayoutHookContext` (`src/index.d.ts`): `layout` is now typed as optional (`layout?: PlotLayout`) since the hook fires before layout computation.
+
 ## [0.3.1] - 2026-04-23
 
 ### Optimized

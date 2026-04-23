@@ -135,7 +135,8 @@ export type AfterSetDataHookContext = HookContextBase & {
 
 export type BeforeLayoutHookContext = HookContextBase & {
   hookName: "beforeLayout";
-  layout: PlotLayout;
+  /** May be set by a plugin to override the computed layout. */
+  layout?: PlotLayout;
 };
 
 export type AfterLayoutHookContext = HookContextBase & {
