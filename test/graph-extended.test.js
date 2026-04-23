@@ -356,15 +356,17 @@ test("Graph.render: beforeLayout fires before _computeLayout and plugin can over
     height: 190
   };
 
-  graph.plugins.call = (name, payload) => {
-    if (name === "beforeLayout") {
-      // Verify _computeLayout has NOT been called yet
-      capturedPayloadAtHookTime = { computeLayoutCalledBeforeHook: computeLayoutCalled };
-      // Plugin overrides the layout
-      payload.layout = customLayout;
+  graph.plugins.configure([
+    {
+      name: "layout-override-test-plugin",
+      beforeLayout(payload) {
+        // Verify _computeLayout has NOT been called yet
+        capturedPayloadAtHookTime = { computeLayoutCalledBeforeHook: computeLayoutCalled };
+        // Plugin overrides the layout
+        payload.layout = customLayout;
+      }
     }
-    return true;
-  };
+  ]);
 
   graph.setData([{ points: [{ x: 0, y: 0 }, { x: 1, y: 1 }] }]);
   graph.render({ force: true });
