@@ -4,7 +4,7 @@ export class Registry {
   }
 
   registerPlugin(plugin) {
-    if (__DEV__) {
+    if (typeof __DEV__ === "undefined" || __DEV__) {
       if (!plugin || typeof plugin !== "object") {
         throw new Error("Plugin must be an object.");
       }
