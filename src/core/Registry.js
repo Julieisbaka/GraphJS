@@ -1,12 +1,10 @@
-const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
-
 export class Registry {
   constructor() {
     this._plugins = new Map();
   }
 
   registerPlugin(plugin) {
-    if (IS_DEV) {
+    if (typeof __DEV__ === "undefined" || __DEV__) {
       if (!plugin || typeof plugin !== "object") {
         throw new Error("Plugin must be an object.");
       }

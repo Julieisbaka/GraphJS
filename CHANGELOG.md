@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3] - 2026-04-23
+
+### Fixed
+
+- **Dead-code elimination now works correctly for `__DEV__`-guarded blocks.** The previous pattern used a local `const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true;` in every module (`Graph.js`, `PluginHost.js`, `hooks.js`, `Registry.js`). Although esbuild could theoretically constant-fold this after replacing `__DEV__` with `false`, the intermediate local variable prevented reliable elimination in practice, leaving validation logic, error strings, and `deepFreeze` in the production bundle and causing the minified size to remain at ~18.6 kb. All local `IS_DEV` declarations have been removed; each file now uses `typeof __DEV__`-guarded checks directly, which esbuild folds to `false` and completely eliminates.
+- **`utils.js` sets `globalThis.__DEV__ = true` as a fallback for unbundled environments.** A one-time guard (`if (typeof __DEV__ === "undefined" && typeof globalThis.__DEV__ === "undefined") { globalThis.__DEV__ = true; }`) provides a default development value for code that reads `globalThis.__DEV__` explicitly (e.g. `freeze`). Note: assigning `globalThis.__DEV__` does not create a bare `__DEV__` identifier binding in ES modules, so all per-module guards use explicit `typeof __DEV__` checks rather than relying on this fallback for bare references.
+- **All `__DEV__` guards use safe `typeof` checks.** Validation guards in `Graph.js`, `PluginHost.js`, and `hooks.js` use `typeof __DEV__ === "undefined" || __DEV__` (dev-by-default: validations run when `__DEV__` is absent) so they never throw `ReferenceError` in unbundled Node.js environments. In production builds esbuild folds `typeof false === "undefined" || false` → `false` and dead-code-eliminates the entire validation block.
+- **`freeze` helper uses `globalThis.__DEV__` as a fallback.** `export const freeze = (typeof __DEV__ !== "undefined" ? __DEV__ : globalThis.__DEV__) ? Object.freeze : v => v;` — resolves to `Object.freeze` in development/test (where `globalThis.__DEV__` is set to `true` by the fallback) and to an identity function in production (where esbuild folds the expression to `false`).
+- **`Registry.js` guard uses `typeof __DEV__ === "undefined" || __DEV__`** to avoid a `ReferenceError` when `Registry` is imported in isolation (without `utils.js`).
+
+### Optimized
+
+- **Build script:** added `--pure:Object.freeze` to the esbuild invocation so esbuild treats every `Object.freeze(...)` call as side-effect-free and removes them when the result is unused.
+- **Build script:** increased terser compression to `passes=3` (from `passes=2`) and added `unsafe=true` and `--mangle` flags for additional expression-level simplifications and property name shortening.
+
 ## [0.3.2] - 2026-04-23
 
 ### Changed

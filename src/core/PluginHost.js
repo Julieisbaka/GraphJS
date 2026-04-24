@@ -2,8 +2,6 @@ import { deepMerge, freeze } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 
-const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
-
 function getPluginPriority(plugin) {
   return Number.isFinite(plugin.priority) ? plugin.priority : 0;
 }
@@ -165,7 +163,7 @@ export class PluginHost {
           throw new Error(`Unknown plugin: ${entry.id}`);
         }
 
-        if (IS_DEV) validatePluginContract(plugin);
+        if (typeof __DEV__ === "undefined" || __DEV__) validatePluginContract(plugin);
 
         const options = deepMerge(plugin.defaults || {}, entry.options || {});
         return { plugin, options };

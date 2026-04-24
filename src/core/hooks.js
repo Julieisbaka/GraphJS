@@ -1,7 +1,5 @@
 import { freeze } from "./utils.js";
 
-const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
-
 export const BUILTIN_HOOKS = freeze([
   "beforeInit",
   "afterInit",
@@ -25,7 +23,7 @@ export class HookRegistry {
   }
 
   register(hookName) {
-    if (IS_DEV) {
+    if (typeof __DEV__ === "undefined" || __DEV__) {
       if (typeof hookName !== "string" || !hookName.trim()) {
         throw new Error("Hook name must be a non-empty string.");
       }

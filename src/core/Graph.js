@@ -24,8 +24,6 @@ import {
 } from "./utils.js";
 import { validateDomain, validateGraphOptions } from "./validation.js";
 
-const IS_DEV = typeof __DEV__ !== "undefined" ? __DEV__ : true; // __DEV__ replaced at build time via --define:__DEV__=false
-
 // Bitmask flags for this._dirty — collapsed to a single integer so esbuild/terser
 // can reduce all checks and resets to bitwise operations instead of property accesses.
 const DIRTY_DATA = 1;
@@ -77,7 +75,7 @@ export class Graph {
     }
 
     this.options = deepMerge(DEFAULT_OPTIONS, options);
-    if (IS_DEV) validateGraphOptions(this.options);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateGraphOptions(this.options);
 
     this.data = [];
     this.hooks = new HookRegistry();
@@ -105,7 +103,7 @@ export class Graph {
     if ("domain" in nextOptions) {
       this.options.domain = nextOptions.domain ?? null;
     }
-    if (IS_DEV) validateGraphOptions(this.options);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateGraphOptions(this.options);
 
     if ("pluginErrorBoundary" in nextOptions) {
       this.plugins.configureErrorBoundary(this.options.pluginErrorBoundary);
@@ -132,7 +130,7 @@ export class Graph {
   }
 
   setDomain(domain = null) {
-    if (IS_DEV) validateDomain(domain);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateDomain(domain);
     this.options.domain = domain;
     this._dirty |= DIRTY_OPTIONS | DIRTY_RENDER;
     return this;
@@ -203,7 +201,7 @@ export class Graph {
     }
 
     const normalized = normalizeSeriesData(payload.nextData, this.options.series || {});
-    this.data = this.options.immutableInputs && IS_DEV ? deepFreeze(normalized) : normalized;
+    this.data = this.options.immutableInputs && (typeof __DEV__ === "undefined" || __DEV__) ? deepFreeze(normalized) : normalized;
 
     this._dirty |= DIRTY_DATA | DIRTY_RENDER;
     this.plugins.call("afterSetData", { data: this.data });
@@ -249,7 +247,7 @@ export class Graph {
       return this._boundsStrategy(dataBounds, this.options);
     }
     const resolved = applyDomainOverride(dataBounds, this.options.domain);
-    if (IS_DEV) validateDomain(resolved);
+    if (typeof __DEV__ === "undefined" || __DEV__) validateDomain(resolved);
     return resolved;
   }
 
