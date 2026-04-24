@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.4] - 2026-04-24
+
+### Fixed
+
+- **`setData` dead-code elimination is now fully handled by esbuild alone.** The previous operand order `this.options.immutableInputs && (typeof __DEV__ === "undefined" || __DEV__)` caused esbuild to emit a comma expression `(this.options.immutableInputs, normalized)` in the production build — because esbuild could not short-circuit past `this.options.immutableInputs` without evaluating it (property accesses may have side effects). The comma expression was only removed downstream by terser's `pure_getters=true` unsafe option. Swapping to `(typeof __DEV__ === "undefined" || __DEV__) && this.options.immutableInputs` lets esbuild short-circuit immediately on the `false` literal it substitutes for `__DEV__`, eliminating both the `deepFreeze` call and the `immutableInputs` property access without relying on terser.
+
 ## [0.3.3] - 2026-04-23
 
 ### Fixed
