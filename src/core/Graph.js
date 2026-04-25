@@ -201,7 +201,7 @@ export class Graph {
     }
 
     const normalized = normalizeSeriesData(payload.nextData, this.options.series || {});
-    this.data = this.options.immutableInputs && (typeof __DEV__ === "undefined" || __DEV__) ? deepFreeze(normalized) : normalized;
+    this.data = (typeof __DEV__ === "undefined" || __DEV__) && this.options.immutableInputs ? deepFreeze(normalized) : normalized;
 
     this._dirty |= DIRTY_DATA | DIRTY_RENDER;
     this.plugins.call("afterSetData", { data: this.data });
