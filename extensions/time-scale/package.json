@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-time-scale",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "First-party time scale labeling extension for GraphJS.",
   "type": "module",
   "main": "./index.js",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Julieisbaka/GraphJS.git"
+    "url": "https://github.com/Julieisbaka/GraphJS.git"
   },
   "license": "MIT",
   "publishConfig": {

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.8] - 2026-04-25
+
+### Fixed
+
+- Removed the `git+` prefix from `repository.url` so the package metadata matches npm Trusted Publishing's GitHub repository URL checks more closely.
+
 ## [0.0.7] - 2026-04-25
 
 ### Fixed

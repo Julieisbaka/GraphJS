@@ -27,7 +27,7 @@ npm install @julieisbaka/graphjs
 
 - The release workflow publishes changed packages from `main` using npm Trusted Publishing via `.github/workflows/release.yml`.
 - The workflow creates release metadata in a JavaScript step, then performs the actual `npm publish --provenance` calls in a dedicated shell step so npm receives the standard GitHub Actions trusted publishing environment.
-- The root package metadata includes a `repository.url` that must exactly match `https://github.com/Julieisbaka/GraphJS` because npm checks that repository identity during trusted publishing authorization.
+- The root package metadata includes a `repository.url` that must exactly match `https://github.com/Julieisbaka/GraphJS` as closely as possible, so the manifest now uses the plain GitHub URL without a `git+` prefix.
 - For a brand-new package on npm, publish it manually once first so the package exists and you can attach npm's GitHub Actions trusted publisher configuration to it.
 - If npm rejects a publish attempt after the workflow has already built the tarball, bump the package version before retrying so the next release uses a fresh semver.
 - After each package is connected to the `julieisbaka/GraphJS` repository and `release.yml` workflow in npm, future version bumps can publish from GitHub Actions without an `NPM_TOKEN` secret.
