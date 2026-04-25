@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.5] - 2026-04-25
+
+### Changed
+
+- Bumped the root package version for the next publish attempt after npm Trusted Publishing authorization troubleshooting.
+
 ## [0.4.4] - 2026-04-25
 
 ### Fixed
