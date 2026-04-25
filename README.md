@@ -21,7 +21,13 @@ npm install @julieisbaka/graphjs
 
 ## Development
 
-- Run the test suite with `npm test`. The test script uses Node's test runner directory mode so it works consistently across Windows shells, WSL, and Linux/macOS shells.
+- Run the test suite with `npm test`. The test script uses a small Node launcher that discovers `test/*.test.js` files and forwards them to Node's test runner, avoiding shell glob differences and the Node 22 CI issue where `node --test test` can be treated like a missing module path.
+
+## Publishing
+
+- The release workflow publishes changed packages from `main` using npm Trusted Publishing via `.github/workflows/release.yml`.
+- For a brand-new package on npm, publish it manually once first so the package exists and you can attach npm's GitHub Actions trusted publisher configuration to it.
+- After each package is connected to the `julieisbaka/GraphJS` repository and `release.yml` workflow in npm, future version bumps can publish from GitHub Actions without an `NPM_TOKEN` secret.
 
 ## Quick Start
 

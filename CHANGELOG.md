@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3] - 2026-04-25
+
+### Changed
+
+- The release workflow now uses npm Trusted Publishing for GitHub Actions instead of a long-lived `NPM_TOKEN` secret.
+- Added publishing notes explaining the one-time manual bootstrap publish needed before attaching trusted publishers for brand-new npm packages.
+
+## [0.4.2] - 2026-04-25
+
+### Fixed
+
+- Replaced the root `npm test` command with a small launcher script that explicitly discovers `test/*.test.js` files before invoking Node's test runner. This avoids the Node 22 CI failure where `node --test test` could resolve `test` as a missing module path instead of a test directory.
+
 ## [0.4.1] - 2026-04-25
 
 ### Changed

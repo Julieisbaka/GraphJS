@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "description": "A zero-dependency, lightweight JavaScript graphing core with powerful plugin hooks.",
   "type": "module",
   "main": "./src/index.js",
@@ -37,7 +37,7 @@
   },
   "scripts": {
     "lint": "node --check src/index.js src/core/*.js",
-    "test": "node --test test",
+    "test": "node ./scripts/run-tests.mjs",
     "build": "esbuild src/index.js --bundle --format=esm --outfile=dist/graphjs.js && esbuild src/index.prod.js --bundle --format=esm --minify --define:__DEV__=false --pure:Object.freeze --mangle-props=^_ --legal-comments=none --tree-shaking=true | terser --compress passes=3,pure_getters=true,unsafe=true --mangle --module --ecma 2020 -o dist/graphjs.min.js"
   },
   "devDependencies": {
