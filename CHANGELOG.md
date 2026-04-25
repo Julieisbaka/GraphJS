@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.4] - 2026-04-25
+
+### Fixed
+
+- The release workflow now performs `npm publish --provenance` in a dedicated shell step instead of spawning it from inside `actions/github-script`, which is a more standard shape for npm Trusted Publishing in GitHub Actions.
+
 ## [0.4.3] - 2026-04-25
 
 ### Changed

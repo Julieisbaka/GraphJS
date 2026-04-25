@@ -29,12 +29,14 @@ jobs:
         run: npm install
 
       - name: Create releases for updated packages
+        id: release_metadata
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
             const { execSync } = require('child_process');
+            const publishPackages = [];
 
             const packages = [
               {
@@ -232,11 +234,42 @@ jobs:
                 continue;
               }
 
-              execSync('npm publish --provenance', {
-                cwd: pkg.dir,
-                stdio: 'inherit',
-                env: process.env,
+              publishPackages.push({
+                name,
+                version,
+                dir: pkg.dir,
               });
-
-              core.info(`Published npm package: ${name}@${version}`);
             }
+
+            const publishFile = path.join(process.env.RUNNER_TEMP, 'graphjs-publish-packages.json');
+            fs.writeFileSync(publishFile, JSON.stringify(publishPackages, null, 2));
+            core.setOutput('publishFile', publishFile);
+
+      - name: Publish changed packages to npm
+        env:
+          PUBLISH_FILE: ${{ steps.release_metadata.outputs.publishFile }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const { execFileSync } = require('child_process');
+
+          const publishFile = process.env.PUBLISH_FILE;
+          if (!publishFile || !fs.existsSync(publishFile)) {
+            console.log('No publish file found; skipping npm publish.');
+            process.exit(0);
+          }
+
+          const packages = JSON.parse(fs.readFileSync(publishFile, 'utf8'));
+          if (!packages.length) {
+            console.log('No changed unpublished packages to publish.');
+            process.exit(0);
+          }
+
+          for (const pkg of packages) {
+            console.log(`Publishing ${pkg.name}@${pkg.version} from ${pkg.dir}`);
+            execFileSync('npm', ['publish', '--provenance'], {
+              cwd: pkg.dir,
+              stdio: 'inherit',
+            });
+          }
+          NODE
