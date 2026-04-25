@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.6] - 2026-04-25
+
+### Fixed
+
+- The npm test script now uses `node --test test` instead of a quoted glob so it runs correctly in WSL/Linux environments where the shell does not expand quoted patterns.
+
 ## [0.3.5] - 2026-04-25
 
 ### Fixed

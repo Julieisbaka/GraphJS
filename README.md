@@ -15,6 +15,10 @@ See `CHANGELOG.md` for release history.
 
 Copy this folder into your project or download from releases.
 
+## Development
+
+- Run the test suite with `npm test`. The test script uses Node's test runner directory mode so it works consistently across Windows shells, WSL, and Linux/macOS shells.
+
 ## Quick Start
 
 ```js
