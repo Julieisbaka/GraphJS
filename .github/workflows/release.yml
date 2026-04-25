@@ -41,6 +41,7 @@ jobs:
                 tagPrefix:     'v',
                 dir:           '.',
                 entry:         'src/index.js',
+                prodEntry:     'src/index.prod.js',
               },
               {
                 pkgPath:       'extensions/crosshair/package.json',
@@ -145,10 +146,27 @@ jobs:
                 `"${esbuild}" ${pkg.entry} --bundle --format=esm --outfile=dist/index.js`,
                 { cwd: pkg.dir }
               );
-              execSync(
-                `"${esbuild}" ${pkg.entry} --bundle --format=esm --minify --outfile=dist/index.min.js`,
-                { cwd: pkg.dir }
-              );
+              if (pkg.prodEntry) {
+                const terserBin = path.resolve('node_modules/.bin/terser');
+                const tempMinifiedBundle = 'dist/index.esbuild.min.js';
+                try {
+                  execSync(
+                    `"${esbuild}" ${pkg.prodEntry} --bundle --format=esm --minify --define:__DEV__=false --pure:Object.freeze --mangle-props=^_ --legal-comments=none --tree-shaking=true --outfile=${tempMinifiedBundle}`,
+                    { cwd: pkg.dir }
+                  );
+                  execSync(
+                    `"${terserBin}" ${tempMinifiedBundle} --compress passes=3,pure_getters=true,unsafe=true --mangle --module --ecma 2020 -o dist/index.min.js`,
+                    { cwd: pkg.dir }
+                  );
+                } finally {
+                  fs.rmSync(path.join(pkg.dir, tempMinifiedBundle), { force: true });
+                }
+              } else {
+                execSync(
+                  `"${esbuild}" ${pkg.entry} --bundle --format=esm --minify --outfile=dist/index.min.js`,
+                  { cwd: pkg.dir }
+                );
+              }
 
               // Pre-release check + release notes extraction from changelog.
               let changelog = "";
