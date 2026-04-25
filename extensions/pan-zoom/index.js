@@ -1,4 +1,39 @@
-import { clamp, clampBounds } from "../../src/core/utils.js";
+const M = Math;
+
+/**
+ * Clamps a numeric value between min and max.
+ *
+ * @param {number} value - Input value.
+ * @param {number} min - Lower bound.
+ * @param {number} max - Upper bound.
+ * @returns {number} Clamped value.
+ */
+function clamp(value, min, max) {
+  return M.max(min, M.min(max, value));
+}
+
+/**
+ * Clamps a viewport bounds object to stay within the full bounds while preserving span.
+ *
+ * @param {{xMin:number,xMax:number,yMin:number,yMax:number}} view - Viewport bounds.
+ * @param {{xMin:number,xMax:number,yMin:number,yMax:number}} full - Full data bounds.
+ * @returns {{xMin:number,xMax:number,yMin:number,yMax:number}} Clamped viewport.
+ */
+function clampBounds(view, full) {
+  const spanX = view.xMax - view.xMin;
+  const spanY = view.yMax - view.yMin;
+  const maxOffsetX = M.max(0, full.xMax - full.xMin - spanX);
+  const maxOffsetY = M.max(0, full.yMax - full.yMin - spanY);
+  const offsetX = M.max(0, M.min(view.xMin - full.xMin, maxOffsetX));
+  const offsetY = M.max(0, M.min(view.yMin - full.yMin, maxOffsetY));
+
+  return {
+    xMin: full.xMin + offsetX,
+    xMax: full.xMin + offsetX + spanX,
+    yMin: full.yMin + offsetY,
+    yMax: full.yMin + offsetY + spanY
+  };
+}
 
 /**
  * Computes local canvas coordinates for a pointer event.

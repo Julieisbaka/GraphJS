@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5] - 2026-04-25
+
+### Changed
+
+- The npm package is now published as `@julieisbaka/graphjs-extension-tooltip-cursor`.
+- README examples now import the core package from `@julieisbaka/graphjs` and the extension from `@julieisbaka/graphjs-extension-tooltip-cursor`.
+- The peer dependency now targets `@julieisbaka/graphjs`.
+- JSDoc references now point at the published `@julieisbaka/graphjs` package instead of a repo-local path.
+
 ## [0.0.4] - 2026-04-15
 
 ### Changed

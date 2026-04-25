@@ -1,12 +1,18 @@
-# graphjs-extension-legend
+# @julieisbaka/graphjs-extension-legend
 
 First-party GraphJS extension that renders a simple legend panel from visible series.
+
+## Install
+
+```bash
+npm install @julieisbaka/graphjs @julieisbaka/graphjs-extension-legend
+```
 
 ## Usage
 
 ```js
-import { Graph } from "../../src/index.js";
-import { legendPlugin } from "./index.js";
+import { Graph } from "@julieisbaka/graphjs";
+import { legendPlugin } from "@julieisbaka/graphjs-extension-legend";
 
 const graph = new Graph("#graph", {
   plugins: [{ plugin: legendPlugin, options: { position: "top-right" } }]

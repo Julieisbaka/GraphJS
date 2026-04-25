@@ -202,13 +202,13 @@ subpath entry.
 
 ## First-party extensions
 
-First-party extensions live at `extensions/` in this workspace:
+First-party extensions live at `extensions/` in this workspace and are published separately on npm:
 
-- `extensions/crosshair`
-- `extensions/legend`
-- `extensions/pan-zoom`
-- `extensions/time-scale`
-- `extensions/tooltip-cursor`
-- `extensions/watermark`
+- `@julieisbaka/graphjs-extension-crosshair`
+- `@julieisbaka/graphjs-extension-legend`
+- `@julieisbaka/graphjs-extension-pan-zoom`
+- `@julieisbaka/graphjs-extension-time-scale`
+- `@julieisbaka/graphjs-extension-tooltip-cursor`
+- `@julieisbaka/graphjs-extension-watermark`
 
 Each extension is a standalone package with its own `package.json` and can be used independently.

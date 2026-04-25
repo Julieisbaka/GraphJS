@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2026-04-25
+
+### Changed
+
+- Documented the first-party extensions with their published scoped npm package names.
+
+### Fixed
+
+- The release workflow now publishes changed packages to npm automatically using the repository secret `NPM_TOKEN` as `NODE_AUTH_TOKEN`.
+- Release asset filenames derived from scoped package names are sanitized before upload so GitHub releases do not receive asset names containing `/`.
+
 ## [0.4.0] - 2026-04-25
 
 ### Changed

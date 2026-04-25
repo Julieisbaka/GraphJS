@@ -22,17 +22,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: npm install
 
       - name: Create releases for updated packages
         uses: actions/github-script@v7
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
             const { execSync } = require('child_process');
+
+            if (!process.env.NODE_AUTH_TOKEN) {
+              throw new Error('Missing NPM_TOKEN repository secret. Set it so the workflow can publish packages to npm.');
+            }
 
             const packages = [
               {
@@ -103,6 +110,18 @@ jobs:
               return changelogContent.slice(afterHeader, end).trim();
             }
 
+            function hasPublishedVersion(name, version, cwd) {
+              try {
+                const out = execSync(
+                  `npm view "${name}@${version}" version --registry=https://registry.npmjs.org/`,
+                  { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+                ).trim();
+                return out === version;
+              } catch {
+                return false;
+              }
+            }
+
             // Determine which package.json files changed in this push.
             let changedFiles;
             try {
@@ -125,16 +144,18 @@ jobs:
               const pkgData = JSON.parse(fs.readFileSync(pkg.pkgPath, 'utf8'));
               const { name, version } = pkgData;
               const tag = `${pkg.tagPrefix}${version}`;
+              const assetBaseName = name.replace(/^@/, '').replace(/\//g, '-');
+              let release = null;
+              let createdRelease = false;
 
               // Skip if a release for this tag already exists.
               try {
-                await github.rest.repos.getReleaseByTag({
+                release = await github.rest.repos.getReleaseByTag({
                   owner: context.repo.owner,
                   repo:  context.repo.repo,
                   tag,
                 });
-                core.info(`Release ${tag} already exists — skipping.`);
-                continue;
+                core.info(`Release ${tag} already exists — skipping release creation and asset upload.`);
               } catch (err) {
                 if (err.status !== 404) throw err;
               }
@@ -183,31 +204,49 @@ jobs:
                 );
               }
 
-              // Create the release.
-              const release = await github.rest.repos.createRelease({
-                owner:      context.repo.owner,
-                repo:       context.repo.repo,
-                tag_name:   tag,
-                name:       `${name} ${version}`,
-                body,
-                draft:      false,
-                prerelease: false,
-              });
-
-              // Upload unminified and minified builds as release assets.
-              for (const [file, assetName] of [
-                ['dist/index.js',     `${name}.js`],
-                ['dist/index.min.js', `${name}.min.js`],
-              ]) {
-                const data = fs.readFileSync(path.join(pkg.dir, file));
-                await github.rest.repos.uploadReleaseAsset({
+              if (!release) {
+                release = await github.rest.repos.createRelease({
                   owner:      context.repo.owner,
                   repo:       context.repo.repo,
-                  release_id: release.data.id,
-                  name:       assetName,
-                  data,
+                  tag_name:   tag,
+                  name:       `${name} ${version}`,
+                  body,
+                  draft:      false,
+                  prerelease: false,
                 });
+                createdRelease = true;
+
+                // Upload unminified and minified builds as release assets.
+                for (const [file, assetName] of [
+                  ['dist/index.js',     `${assetBaseName}.js`],
+                  ['dist/index.min.js', `${assetBaseName}.min.js`],
+                ]) {
+                  const data = fs.readFileSync(path.join(pkg.dir, file));
+                  await github.rest.repos.uploadReleaseAsset({
+                    owner:      context.repo.owner,
+                    repo:       context.repo.repo,
+                    release_id: release.data.id,
+                    name:       assetName,
+                    data,
+                  });
+                }
+
+                core.info(`Created release: ${tag} (${assetBaseName}.js + ${assetBaseName}.min.js)`);
               }
 
-              core.info(`Created release: ${tag} (${name}.js + ${name}.min.js)`);
+              if (hasPublishedVersion(name, version, pkg.dir)) {
+                core.info(`npm package ${name}@${version} already exists — skipping npm publish.`);
+                continue;
+              }
+
+              execSync('npm publish', {
+                cwd: pkg.dir,
+                stdio: 'inherit',
+                env: {
+                  ...process.env,
+                  NODE_AUTH_TOKEN: process.env.NODE_AUTH_TOKEN,
+                },
+              });
+
+              core.info(`Published npm package: ${name}@${version}`);
             }

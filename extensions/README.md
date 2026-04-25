@@ -1,6 +1,6 @@
 # GraphJS First-Party Extensions
 
-This folder contains first-party GraphJS extensions and is intentionally separate from `graphjs/src`.
+This folder contains first-party GraphJS extensions and is intentionally separate from `@julieisbaka/graphjs` core.
 
 - These extensions are **not** part of the core package payload.
 - They are designed to plug into GraphJS via the plugin API.
@@ -9,18 +9,18 @@ This folder contains first-party GraphJS extensions and is intentionally separat
 
 Current extensions:
 
-- `crosshair`
-- `legend`
-- `tooltip-cursor`
-- `pan-zoom`
-- `time-scale`
-- `watermark`
+- `@julieisbaka/graphjs-extension-crosshair`
+- `@julieisbaka/graphjs-extension-legend`
+- `@julieisbaka/graphjs-extension-tooltip-cursor`
+- `@julieisbaka/graphjs-extension-pan-zoom`
+- `@julieisbaka/graphjs-extension-time-scale`
+- `@julieisbaka/graphjs-extension-watermark`
 
 Example imports:
 
-- `./extensions/crosshair/index.js`
-- `./extensions/legend/index.js`
-- `./extensions/tooltip-cursor/index.js`
-- `./extensions/pan-zoom/index.js`
-- `./extensions/time-scale/index.js`
-- `./extensions/watermark/index.js`
+- `@julieisbaka/graphjs-extension-crosshair`
+- `@julieisbaka/graphjs-extension-legend`
+- `@julieisbaka/graphjs-extension-tooltip-cursor`
+- `@julieisbaka/graphjs-extension-pan-zoom`
+- `@julieisbaka/graphjs-extension-time-scale`
+- `@julieisbaka/graphjs-extension-watermark`

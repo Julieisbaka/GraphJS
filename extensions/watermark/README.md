@@ -1,4 +1,4 @@
-# graphjs-extension-watermark
+# @julieisbaka/graphjs-extension-watermark
 
 First-party GraphJS extension that renders a text watermark after graph rendering.
 
@@ -6,11 +6,15 @@ First-party GraphJS extension that renders a text watermark after graph renderin
 
 This extension is intentionally separate from GraphJS core. Add it explicitly in your project.
 
+```bash
+npm install @julieisbaka/graphjs @julieisbaka/graphjs-extension-watermark
+```
+
 ## Usage
 
 ```js
-import { Graph } from "../../src/index.js";
-import { watermarkPlugin } from "./index.js";
+import { Graph } from "@julieisbaka/graphjs";
+import { watermarkPlugin } from "@julieisbaka/graphjs-extension-watermark";
 
 const graph = new Graph("#graph", {
   plugins: [

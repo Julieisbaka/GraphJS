@@ -1,4 +1,4 @@
-# graphjs-extension-crosshair
+# @julieisbaka/graphjs-extension-crosshair
 
 First-party GraphJS extension that draws configurable crosshair guide lines.
 
@@ -6,11 +6,15 @@ First-party GraphJS extension that draws configurable crosshair guide lines.
 
 This extension is intentionally separate from GraphJS core. Add it explicitly in your project.
 
+```bash
+npm install @julieisbaka/graphjs @julieisbaka/graphjs-extension-crosshair
+```
+
 ## Usage
 
 ```js
-import { Graph } from "../../src/index.js";
-import { crosshairPlugin } from "./index.js";
+import { Graph } from "@julieisbaka/graphjs";
+import { crosshairPlugin } from "@julieisbaka/graphjs-extension-crosshair";
 
 const graph = new Graph("#graph", {
   plugins: [

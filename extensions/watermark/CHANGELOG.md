@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2026-04-25
+
+### Changed
+
+- The npm package is now published as `@julieisbaka/graphjs-extension-watermark`.
+- README examples now import the core package from `@julieisbaka/graphjs` and the extension from `@julieisbaka/graphjs-extension-watermark`.
+- The peer dependency now targets `@julieisbaka/graphjs`.
+
 ## [0.0.3] - 2026-04-15
 
 ### Changed

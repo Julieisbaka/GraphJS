@@ -1,12 +1,18 @@
-# graphjs-extension-time-scale
+# @julieisbaka/graphjs-extension-time-scale
 
 First-party GraphJS extension for rendering time-formatted x-axis labels.
+
+## Install
+
+```bash
+npm install @julieisbaka/graphjs @julieisbaka/graphjs-extension-time-scale
+```
 
 ## Usage
 
 ```js
-import { Graph } from "../../src/index.js";
-import { timeScalePlugin } from "./index.js";
+import { Graph } from "@julieisbaka/graphjs";
+import { timeScalePlugin } from "@julieisbaka/graphjs-extension-time-scale";
 
 const graph = new Graph("#graph", {
   plugins: [{ plugin: timeScalePlugin, options: { ticks: 6 } }]

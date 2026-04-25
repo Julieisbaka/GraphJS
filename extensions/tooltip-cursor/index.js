@@ -16,7 +16,7 @@ function getMousePosition(canvas, event) {
 /**
  * Finds the nearest rendered data point to the mouse location.
  *
- * @param {import("../../graphjs/src/core/Graph.js").Graph} graph - Graph instance.
+ * @param {import("@julieisbaka/graphjs").Graph} graph - Graph instance.
  * @param {{left:number,top:number,right:number,bottom:number,width:number,height:number}} layout - Plot layout.
  * @param {{xMin:number,xMax:number,yMin:number,yMax:number}} bounds - Current data bounds.
  * @param {{x:number,y:number}} mouse - Mouse position in canvas space.

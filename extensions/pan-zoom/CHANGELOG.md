@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.9] - 2026-04-25
+
+### Changed
+
+- The npm package is now published as `@julieisbaka/graphjs-extension-pan-zoom`.
+- The runtime no longer depends on a repo-local internal utils path, so the package remains publishable without breaking local workspace tests.
+- README examples now import the core package from `@julieisbaka/graphjs` and the extension from `@julieisbaka/graphjs-extension-pan-zoom`.
+- The peer dependency now targets `@julieisbaka/graphjs`.
+
 ## [0.0.8] - 2026-04-20
 
 ### Fixed
