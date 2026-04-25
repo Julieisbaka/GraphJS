@@ -1,13 +1,32 @@
+/**
+ * Throws an Error when a validation condition is not met.
+ *
+ * @param {boolean} condition - Validation result.
+ * @param {string} message - Error message to throw when invalid.
+ * @returns {void}
+ */
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
 }
 
+/**
+ * Returns whether a value is a finite number.
+ *
+ * @param {unknown} value - Value to inspect.
+ * @returns {boolean}
+ */
 function isFiniteNumber(value) {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+/**
+ * Validates a user-supplied domain override.
+ *
+ * @param {import("../index.d.ts").DomainOverride} domain - Domain object or null.
+ * @returns {void}
+ */
 export function validateDomain(domain) {
   if (domain == null) {
     return;
@@ -30,6 +49,12 @@ export function validateDomain(domain) {
   }
 }
 
+/**
+ * Validates a graph options object.
+ *
+ * @param {import("../index.d.ts").GraphOptions} options - Options object to validate.
+ * @returns {void}
+ */
 export function validateGraphOptions(options) {
   assert(isFiniteNumber(options.width) && options.width > 0, "width: expected positive number.");
   assert(isFiniteNumber(options.height) && options.height > 0, "height: expected positive number.");
@@ -78,6 +103,12 @@ export function validateGraphOptions(options) {
   }
 }
 
+/**
+ * Validates the structural contract of a plugin definition.
+ *
+ * @param {import("../index.d.ts").GraphPlugin} plugin - Plugin definition to validate.
+ * @returns {void}
+ */
 export function validatePluginContract(plugin) {
   assert(plugin && typeof plugin === "object", "Plugin must be an object.");
   assert(typeof plugin.id === "string" && plugin.id.trim().length > 0, "plugin.id: expected non-empty string.");

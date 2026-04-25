@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-04-25
+
+### Changed
+
+- The published npm package is now named `@julieisbaka/graphjs`.
+- README examples now import the library from `@julieisbaka/graphjs`, and utility imports use the scoped `@julieisbaka/graphjs/utils` subpath.
+- Added JSDoc comments across the core runtime so editors can show richer hover descriptions for graph, plugin, registry, rendering, and validation functions.
+
+### Fixed
+
+- Added `publishConfig.access = public` so the scoped package publishes with public access by default.
+
 ## [0.3.6] - 2026-04-25
 
 ### Fixed

@@ -13,10 +13,22 @@
  * boundary.handle("my-plugin", "install", err);
  */
 export class ErrorBoundary {
+  /**
+   * Creates a new plugin error boundary configuration wrapper.
+   *
+   * @param {{enabled?: boolean, onError?: ((args: {pluginId: string, phase: string, error: unknown, context: Record<string, unknown>}) => void) | null}} [settings={}]
+   */
   constructor(settings = {}) {
     this.enabled = settings.enabled !== false;
     this.onError = settings.onError ?? null;
   }
+
+  /**
+   * Applies a partial update to the current boundary settings.
+   *
+   * @param {{enabled?: boolean, onError?: ((args: {pluginId: string, phase: string, error: unknown, context: Record<string, unknown>}) => void) | null}} [settings={}]
+   * @returns {void}
+   */
   configure(settings = {}) {
     if ("enabled" in settings) {
       this.enabled = settings.enabled !== false;
@@ -26,7 +38,15 @@ export class ErrorBoundary {
     }
   }
 
-
+  /**
+   * Handles a plugin error using the configured boundary behavior.
+   *
+   * @param {string} pluginId - Plugin identifier.
+   * @param {string} phase - Lifecycle phase that raised the error.
+   * @param {unknown} error - Original thrown value.
+   * @param {Record<string, unknown>} [context={}] - Additional contextual data for diagnostics.
+   * @returns {void}
+   */
   handle(pluginId, phase, error, context = {}) {
     if (!this.enabled) {
       throw error;

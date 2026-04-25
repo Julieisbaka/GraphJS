@@ -1,5 +1,10 @@
 import { freeze } from "./utils.js";
 
+/**
+ * Default GraphJS configuration applied to every graph instance before user overrides.
+ *
+ * @type {Readonly<import("../index.d.ts").GraphOptions>}
+ */
 export const DEFAULT_OPTIONS = freeze({
   width: 640,
   height: 360,

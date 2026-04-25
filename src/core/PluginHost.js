@@ -2,10 +2,22 @@ import { deepMerge, freeze } from "./utils.js";
 import { validatePluginContract } from "./validation.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 
+/**
+ * Returns the numeric sort priority of a plugin.
+ *
+ * @param {{priority?: number}} plugin - Plugin definition.
+ * @returns {number}
+ */
 function getPluginPriority(plugin) {
   return Number.isFinite(plugin.priority) ? plugin.priority : 0;
 }
 
+/**
+ * Normalizes the supported plugin entry shapes into a consistent internal record.
+ *
+ * @param {string|{id?: string, plugin?: object, options?: Record<string, unknown>}|null|undefined} entry - Raw plugin entry.
+ * @returns {{id: string, plugin?: object, options: Record<string, unknown>}|null}
+ */
 function normalizePluginConfig(entry) {
   if (!entry) {
     return null;
@@ -30,6 +42,14 @@ function normalizePluginConfig(entry) {
   throw new Error("Invalid plugin declaration.");
 }
 
+/**
+ * Resolves the command map for a plugin, including function-based lazy command factories.
+ *
+ * @param {object} plugin - Plugin definition.
+ * @param {Record<string, unknown>} options - Resolved plugin options.
+ * @param {object} api - Plugin API object.
+ * @returns {Record<string, unknown>}
+ */
 function normalizeCommandMap(plugin, options, api) {
   if (!plugin.commands) {
     return {};
@@ -43,6 +63,12 @@ function normalizeCommandMap(plugin, options, api) {
   return typeof plugin.commands === "object" ? plugin.commands : {};
 }
 
+/**
+ * Orders plugins using before/after dependencies with priority as a tie-breaker.
+ *
+ * @param {Array<{plugin: {id: string, before?: string[], after?: string[], priority?: number}}>} records - Plugin records.
+ * @returns {Array<{plugin: {id: string, before?: string[], after?: string[], priority?: number}}>} Ordered plugin records.
+ */
 function orderPlugins(records) {
   const byId = new Map(records.map((r) => [r.plugin.id, r]));
   const indegree = new Map();
@@ -103,7 +129,17 @@ function orderPlugins(records) {
   return ordered;
 }
 
+/**
+ * Coordinates plugin installation, hook dispatch, and command registration for a graph instance.
+ */
 export class PluginHost {
+  /**
+   * Creates a plugin host bound to a graph instance.
+   *
+   * @param {import("./Graph.js").Graph} graph - Owning graph instance.
+   * @param {import("./Registry.js").Registry} registry - Global plugin registry.
+   * @param {import("./hooks.js").HookRegistry} hookRegistry - Hook registry used by the graph.
+   */
   constructor(graph, registry, hookRegistry) {
     this.graph = graph;
     this.registry = registry;
@@ -113,14 +149,37 @@ export class PluginHost {
     this._errorBoundary = new ErrorBoundary(graph.options?.pluginErrorBoundary ?? {});
   }
 
+  /**
+   * Reconfigures the plugin error boundary at runtime.
+   *
+   * @param {{enabled?: boolean, onError?: Function | null}} settings - Partial error boundary settings.
+   * @returns {void}
+   */
   configureErrorBoundary(settings) {
     this._errorBoundary.configure(settings);
   }
 
+  /**
+   * Routes a plugin error through the configured error boundary.
+   *
+   * @param {{id: string}} plugin - Plugin definition.
+   * @param {string} phase - Phase label.
+   * @param {unknown} error - Original thrown value.
+   * @param {Record<string, unknown>} [context={}] - Extra context for diagnostics.
+   * @returns {void}
+   */
   _handlePluginError(plugin, phase, error, context = {}) {
     this._errorBoundary.handle(plugin.id, phase, error, context);
   }
 
+  /**
+   * Returns whether a plugin should run for the current hook dispatch.
+   *
+   * @param {{capabilities?: {hooks?: string[], needsLayout?: boolean, needsBounds?: boolean, needsData?: boolean}}} plugin - Plugin definition.
+   * @param {string} hookName - Hook currently being dispatched.
+   * @param {Record<string, unknown>} context - Hook context.
+   * @returns {boolean}
+   */
   _pluginCanRunForHook(plugin, hookName, context) {
     const capabilities = plugin.capabilities || {};
 
@@ -140,6 +199,12 @@ export class PluginHost {
     return true;
   }
 
+  /**
+   * Configures the active plugin list for the graph instance.
+   *
+   * @param {Array<string|object>} [pluginEntries=[]] - Plugin declarations to activate.
+   * @returns {void}
+   */
   configure(pluginEntries = []) {
     const incomingIds = new Set(
       pluginEntries
@@ -215,6 +280,12 @@ export class PluginHost {
     }
   }
 
+  /**
+   * Creates the plugin API exposed to install hooks, command handlers, and lifecycle callbacks.
+   *
+   * @param {string} pluginId - Id of the plugin receiving the API.
+   * @returns {object}
+   */
   getPluginApi(pluginId) {
     const host = this;
     return freeze({
@@ -259,6 +330,13 @@ export class PluginHost {
     });
   }
 
+  /**
+   * Dispatches a hook to all configured plugins that can handle it.
+   *
+   * @param {string} hookName - Hook name to dispatch.
+   * @param {Record<string, unknown>} [context={}] - Hook context payload.
+   * @returns {boolean} False when a plugin cancels the phase; otherwise true.
+   */
   call(hookName, context = {}) {
     if (!this.hookRegistry.has(hookName)) {
       return true;

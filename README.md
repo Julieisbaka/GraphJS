@@ -13,7 +13,11 @@ See `CHANGELOG.md` for release history.
 
 ## Install
 
-Copy this folder into your project or download from releases.
+Install from npm:
+
+```bash
+npm install @julieisbaka/graphjs
+```
 
 ## Development
 
@@ -22,7 +26,7 @@ Copy this folder into your project or download from releases.
 ## Quick Start
 
 ```js
-import { Graph } from "./src/index.js";
+import { Graph } from "@julieisbaka/graphjs";
 
 const graph = new Graph("#graph", {
   width: 800,
@@ -55,7 +59,7 @@ Plugins can be registered globally or passed per graph instance.
 ### Global plugin registration
 
 ```js
-import { Graph } from "./src/index.js";
+import { Graph } from "@julieisbaka/graphjs";
 
 Graph.registerPlugin(myPlugin);
 
@@ -172,7 +176,7 @@ Any hook can return `false` to cancel the current stage.
 
 GraphJS exports helpers for use in extensions and custom renderers.
 
-All utility functions are available exclusively via the `graphjs/utils` subpath:
+All utility functions are available exclusively via the `@julieisbaka/graphjs/utils` subpath:
 
 - `decimatePointsStride`
 - `resolveCanvas`
@@ -193,7 +197,7 @@ All utility functions are available exclusively via the `graphjs/utils` subpath:
 
 GraphJS ships TypeScript declaration files for the core API, plugin contract,
 command system, and options (`src/index.d.ts`). Utility function types are
-declared separately in `src/utils.d.ts` and are exposed via the `graphjs/utils`
+declared separately in `src/utils.d.ts` and are exposed via the `@julieisbaka/graphjs/utils`
 subpath entry.
 
 ## First-party extensions

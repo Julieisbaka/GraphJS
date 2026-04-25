@@ -1,6 +1,6 @@
 {
-  "name": "graphjs",
-  "version": "0.3.6",
+  "name": "@julieisbaka/graphjs",
+  "version": "0.4.0",
   "description": "A zero-dependency, lightweight JavaScript graphing core with powerful plugin hooks.",
   "type": "module",
   "main": "./src/index.js",
@@ -29,6 +29,9 @@
     "zero-dependency"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22"
   },

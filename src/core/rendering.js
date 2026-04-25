@@ -3,6 +3,16 @@ import { clamp, makeLinearScale } from "./utils.js";
 const M = Math;
 const TAU = M.PI * 2;
 
+/**
+ * Renders a single line series onto a 2D canvas context.
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context to draw into.
+ * @param {import("../index.d.ts").PlotLayout} plot - Plot rectangle.
+ * @param {import("../index.d.ts").Series} series - Series to render.
+ * @param {(value: number) => number} xScale - Maps x domain values to pixels.
+ * @param {(value: number) => number} yScale - Maps y domain values to pixels.
+ * @returns {void}
+ */
 export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   const points = series.points;
   if (!points.length) {
@@ -45,6 +55,14 @@ export function drawLineSeries(ctx, plot, series, xScale, yScale) {
   ctx.restore();
 }
 
+/**
+ * Creates a stable cache key for the static graph layer.
+ *
+ * @param {import("../index.d.ts").GraphOptions} options - Current graph options.
+ * @param {import("../index.d.ts").PlotLayout} plot - Current plot layout.
+ * @param {import("../index.d.ts").DataBounds} bounds - Current resolved bounds.
+ * @returns {string}
+ */
 export function makeStaticLayerKey(options, plot, bounds) {
   return JSON.stringify({
     width: options.width,
@@ -57,6 +75,12 @@ export function makeStaticLayerKey(options, plot, bounds) {
   });
 }
 
+/**
+ * Computes the plot rectangle from width, height, and padding.
+ *
+ * @param {import("../index.d.ts").GraphOptions} options - Graph options containing dimensions and padding.
+ * @returns {import("../index.d.ts").PlotLayout}
+ */
 export function computeLayout(options) {
   const { width, height, padding } = options;
   return {
@@ -69,6 +93,15 @@ export function computeLayout(options) {
   };
 }
 
+/**
+ * Creates an offscreen or in-memory canvas buffer for the static layer cache.
+ *
+ * @param {import("../index.d.ts").GraphOptions} options - Graph options containing scalability settings.
+ * @param {number} width - CSS width in pixels.
+ * @param {number} height - CSS height in pixels.
+ * @param {number} dpr - Device pixel ratio.
+ * @returns {{canvas: OffscreenCanvas|HTMLCanvasElement|null, ctx: CanvasRenderingContext2D|null}}
+ */
 export function createBufferCanvas(options, width, height, dpr) {
   const useOffscreen = options.scalability.useOffscreenCanvas && typeof OffscreenCanvas !== "undefined";
 
@@ -100,6 +133,13 @@ export function createBufferCanvas(options, width, height, dpr) {
   return { canvas: null, ctx: null };
 }
 
+/**
+ * Paints the graph background.
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context to draw into.
+ * @param {import("../index.d.ts").GraphOptions} options - Graph options containing width, height, and background.
+ * @returns {void}
+ */
 export function drawBackdrop(ctx, options) {
   const { width, height, background } = options;
   ctx.save();
@@ -108,6 +148,15 @@ export function drawBackdrop(ctx, options) {
   ctx.restore();
 }
 
+/**
+ * Draws grid lines and axes for the current plot.
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context to draw into.
+ * @param {import("../index.d.ts").GraphOptions} options - Graph options containing axis and grid settings.
+ * @param {import("../index.d.ts").PlotLayout} plot - Plot rectangle.
+ * @param {import("../index.d.ts").DataBounds} bounds - Resolved graph bounds.
+ * @returns {void}
+ */
 export function drawGrid(ctx, options, plot, bounds) {
   const { grid, axes } = options;
 
