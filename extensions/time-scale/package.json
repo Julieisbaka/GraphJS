@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-time-scale",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "First-party time scale labeling extension for GraphJS.",
   "type": "module",
   "main": "./index.js",
@@ -25,7 +25,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@julieisbaka/graphjs": ">=0.4.0"
+    "@julieisbaka/graphjs": ">=0.4.3"
   },
   "scripts": {
     "lint": "node --check index.js",

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.6] - 2026-04-25
+
+### Changed
+
+- The peer dependency now requires `@julieisbaka/graphjs >=0.4.3` to match the current core release line.
+
 ## [0.0.5] - 2026-04-25
 
 ### Changed
