@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.5] - 2026-04-25
+
+### Fixed
+
+- **Release workflow now builds the minified asset with the correct production pipeline.** The previous workflow used `src/index.js` (the development entry that includes validation) for both the unminified and minified builds, and only applied `--minify` — omitting `--define:__DEV__=false`, `--pure:Object.freeze`, `--mangle-props=^_`, and the terser post-processing pass. This left all validation code (`validateDomain`, `validateGraphOptions`, `validatePluginContract`), dead `__DEV__`-guarded branches, and all development-only error strings in the release asset, inflating `graphjs.min.js` to ~18.8 kb. The workflow now uses `src/index.prod.js` (the production entry that omits validation exports) together with the full DCE flag set and terser, matching `npm run build`, reducing the asset to ~14 kb.
+
 ## [0.3.4] - 2026-04-24
 
 ### Fixed
