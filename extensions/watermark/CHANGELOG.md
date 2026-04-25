@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.6] - 2026-04-25
+
+### Fixed
+
+- Added an explicit `repository.url` pointing at `https://github.com/Julieisbaka/GraphJS` so npm Trusted Publishing can match the package metadata to the GitHub repository during publish authorization.
+
 ## [0.0.5] - 2026-04-25
 
 ### Changed

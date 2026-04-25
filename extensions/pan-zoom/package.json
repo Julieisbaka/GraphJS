@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-pan-zoom",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "First-party pan and zoom extension for GraphJS.",
   "type": "module",
   "main": "./index.js",
@@ -20,6 +20,10 @@
     "zoom",
     "plugin"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Julieisbaka/GraphJS.git"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"

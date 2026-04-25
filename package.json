@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "A zero-dependency, lightweight JavaScript graphing core with powerful plugin hooks.",
   "type": "module",
   "main": "./src/index.js",
@@ -28,6 +28,10 @@
     "canvas",
     "zero-dependency"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Julieisbaka/GraphJS.git"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"

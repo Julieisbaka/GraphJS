@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-crosshair",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "First-party crosshair extension for GraphJS.",
   "type": "module",
   "main": "./index.js",
@@ -19,6 +19,10 @@
     "crosshair",
     "plugin"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Julieisbaka/GraphJS.git"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
