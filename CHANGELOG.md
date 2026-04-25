@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.8] - 2026-04-25
+
+### Fixed
+
+- Removed the trailing `.git` from the root `repository.url` so the package metadata exactly matches the GitHub repository URL format npm documents for trusted publishing checks.
+
 ## [0.4.7] - 2026-04-25
 
 ### Fixed

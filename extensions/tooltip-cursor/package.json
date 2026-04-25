@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-tooltip-cursor",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "First-party tooltip + cursor extension for GraphJS.",
   "type": "module",
   "main": "./index.js",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Julieisbaka/GraphJS.git"
+    "url": "https://github.com/Julieisbaka/GraphJS"
   },
   "license": "MIT",
   "publishConfig": {
