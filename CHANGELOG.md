@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.9] - 2026-04-27
+
+### Fixed
+
+- Added `--access public` flag to the `npm publish` command in the release workflow so the registry always uses the public-package PUT endpoint for scoped packages, preventing the spurious 404 "not in this registry" error.
+- Added a step in the release workflow to delete the legacy `//registry.npmjs.org/:_authToken` npm config key (written by `actions/setup-node` with `registry-url`) before publishing, ensuring npm uses OIDC trusted publishing rather than falling back to an empty token.
+
 ## [0.4.8] - 2026-04-25
 
 ### Fixed

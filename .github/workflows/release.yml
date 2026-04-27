@@ -245,6 +245,9 @@ jobs:
             fs.writeFileSync(publishFile, JSON.stringify(publishPackages, null, 2));
             core.setOutput('publishFile', publishFile);
 
+      - name: Remove legacy npm auth token
+        run: npm config delete //registry.npmjs.org/:_authToken || true
+
       - name: Publish changed packages to npm
         env:
           PUBLISH_FILE: ${{ steps.release_metadata.outputs.publishFile }}
@@ -267,7 +270,7 @@ jobs:
 
           for (const pkg of packages) {
             console.log(`Publishing ${pkg.name}@${pkg.version} from ${pkg.dir}`);
-            execFileSync('npm', ['publish', '--provenance'], {
+            execFileSync('npm', ['publish', '--provenance', '--access', 'public'], {
               cwd: pkg.dir,
               stdio: 'inherit',
             });
