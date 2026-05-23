@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Julieisbaka/GraphJS/documentation/docs/reference/default-options.schema.json",
+  "title": "GraphJS Default Options",
+  "description": "JSON Schema for GraphJS core default options.",
+  "type": "object",
+  "required": [
+    "width",
+    "height",
+    "background",
+    "padding",
+    "immutableInputs",
+    "domain",
+    "series",
+    "sampling",
+    "scalability",
+    "pluginErrorBoundary",
+    "axes",
+    "grid",
+    "plugins"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "width": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "default": 640
+    },
+    "height": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "default": 360
+    },
+    "background": {
+      "type": "string",
+      "default": "#fff"
+    },
+    "padding": {
+      "type": "object",
+      "required": ["top", "right", "bottom", "left"],
+      "additionalProperties": false,
+      "properties": {
+        "top": { "type": "number", "minimum": 0, "default": 24 },
+        "right": { "type": "number", "minimum": 0, "default": 24 },
+        "bottom": { "type": "number", "minimum": 0, "default": 32 },
+        "left": { "type": "number", "minimum": 0, "default": 40 }
+      }
+    },
+    "immutableInputs": {
+      "type": "boolean",
+      "default": false
+    },
+    "domain": {
+      "default": null,
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "xMin": { "type": "number" },
+            "xMax": { "type": "number" },
+            "yMin": { "type": "number" },
+            "yMax": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "series": {
+      "type": "object",
+      "required": ["type", "color", "lineWidth", "pointRadius"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "default": "line" },
+        "color": { "type": "string", "default": "#3b82f6" },
+        "lineWidth": { "type": "number", "exclusiveMinimum": 0, "default": 2 },
+        "pointRadius": { "type": "number", "minimum": 0, "default": 0 }
+      }
+    },
+    "sampling": {
+      "type": "object",
+      "required": ["enabled", "maxPoints", "method"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "maxPoints": { "type": "integer", "minimum": 2, "default": 1200 },
+        "method": { "type": "string", "minLength": 1, "default": "stride" }
+      }
+    },
+    "scalability": {
+      "type": "object",
+      "required": ["dirtyRender", "layerCaching", "useOffscreenCanvas"],
+      "additionalProperties": false,
+      "properties": {
+        "dirtyRender": { "type": "boolean", "default": false },
+        "layerCaching": { "type": "boolean", "default": true },
+        "useOffscreenCanvas": { "type": "boolean", "default": true }
+      }
+    },
+    "pluginErrorBoundary": {
+      "type": "object",
+      "required": ["enabled", "onError"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "onError": {
+          "default": null,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "description": "Function values are not representable in JSON schema. Use null or provide runtime function in code." }
+          ]
+        }
+      }
+    },
+    "axes": {
+      "type": "object",
+      "required": ["show", "color", "lineWidth"],
+      "additionalProperties": false,
+      "properties": {
+        "show": { "type": "boolean", "default": true },
+        "color": { "type": "string", "default": "#94a3b8" },
+        "lineWidth": { "type": "number", "exclusiveMinimum": 0, "default": 1 }
+      }
+    },
+    "grid": {
+      "type": "object",
+      "required": ["show", "color", "lineWidth", "xTicks", "yTicks"],
+      "additionalProperties": false,
+      "properties": {
+        "show": { "type": "boolean", "default": true },
+        "color": { "type": "string", "default": "#e2e8f0" },
+        "lineWidth": { "type": "number", "exclusiveMinimum": 0, "default": 1 },
+        "xTicks": { "type": "integer", "minimum": 1, "default": 5 },
+        "yTicks": { "type": "integer", "minimum": 1, "default": 5 }
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": true
+          },
+          {
+            "type": "object",
+            "required": ["plugin"],
+            "properties": {
+              "plugin": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 }
+                },
+                "additionalProperties": true
+              },
+              "options": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  }
+}

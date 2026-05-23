@@ -4,6 +4,26 @@ GraphJS is a **zero-dependency**, lightweight JavaScript graphing core built for
 
 See `CHANGELOG.md` for release history.
 
+## Documentation
+
+Comprehensive documentation now lives in `documentation/docs/`.
+
+- Documentation landing: `documentation/README.md`
+- Hub: `documentation/docs/README.md`
+- Installation: `documentation/docs/getting-started/installation.md`
+- Package usage: `documentation/docs/getting-started/package-usage-guide.md`
+- Plugin development: `documentation/docs/guides/plugin-development-guide.md`
+- Troubleshooting: `documentation/docs/guides/troubleshooting.md`
+- Core API reference: `documentation/docs/reference/core-api.md`
+- Hook reference: `documentation/docs/reference/hooks-reference.md`
+- Utilities API reference: `documentation/docs/reference/utils-api.md`
+- Validation API reference: `documentation/docs/reference/validation-reference.md`
+- Default options reference: `documentation/docs/reference/default-options.md`
+- Default options JSON Schema: `documentation/docs/reference/default-options.schema.json`
+- First-party plugin docs: `documentation/docs/plugins/`
+
+Each first-party plugin page includes an internal evolution timeline derived from that plugin package's own changelog (`extensions/*/CHANGELOG.md`).
+
 ## Goals
 
 - Tiny core, no external runtime dependencies
@@ -181,6 +201,7 @@ Any hook can return `false` to cancel the current stage.
 - `Graph.renderers` — `Map<string, fn>` of all registered renderers
 
 Renderer `type` keys are normalized with `trim()` during registration and unregistration.
+
 - `Graph.registerSampler(name, fn)` — register a custom data sampler
 - `Graph.unregisterSampler(name)` — unregister a custom data sampler
 - `Graph.samplers` — `Map<string, fn>` of all registered samplers
@@ -232,5 +253,6 @@ First-party extensions live at `extensions/` in this workspace and are published
 - `@julieisbaka/graphjs-extension-time-scale`
 - `@julieisbaka/graphjs-extension-tooltip-cursor`
 - `@julieisbaka/graphjs-extension-watermark`
+- `@julieisbaka/graphjs-extension-sampling`
 
 Each extension is a standalone package with its own `package.json` and can be used independently.
