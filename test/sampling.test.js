@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { lttb, m4, rdp, ltd, ltob, sma } from "../extensions/sampling/index.js";
 import { triangleArea, splitBuckets } from "../extensions/sampling/common.js";
+import { samplingPlugin } from "../extensions/sampling/index.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -221,7 +222,6 @@ test("samplingPlugin.install registers all samplers on Graph", () => {
     }
   };
 
-  const { samplingPlugin } = await import("../extensions/sampling/index.js");
   samplingPlugin.install(graphStub);
 
   for (const name of ["lttb", "m4", "rdp", "ltd", "ltob", "sma"]) {
