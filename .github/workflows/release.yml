@@ -287,6 +287,7 @@ jobs:
                 [
                   `npm publish failed for ${pkg.name}@${pkg.version} (status: ${status}).`,
                   'Common causes:',
+                  '- Publish was attempted without --access public (publishConfig.access alone may not control endpoint routing).',
                   '- The package/scope is not yet bootstrapped on npm (manual first publish required).',
                   '- Trusted Publishing is not attached to this repo/workflow in npm package settings.',
                   '- The publishing identity does not have permission for this npm scope.',

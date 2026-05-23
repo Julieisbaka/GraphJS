@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] - 2026-05-23
+
+### Changed
+
+- Publishing guidance now explicitly documents that `--access public` is required for scoped package publishes, and that `publishConfig.access` alone may not control npm endpoint routing in all publish contexts.
+- Added an explicit manual publish command example (`npm publish --provenance --access public`) in the README publishing section.
+
+### Fixed
+
+- Release workflow publish failure guidance now calls out missing `--access public` as a first-class failure cause when troubleshooting npm publish errors.
+
 ## [0.5.1] - 2026-05-23
 
 ### Fixed
