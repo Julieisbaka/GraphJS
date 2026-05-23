@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2026-05-23
+
+### Fixed
+
+- Release publish step now calls `npm publish --provenance --access public` for scoped packages, preventing first-publish scoped access pitfalls.
+- Release publish errors now include clearer guidance for npm scope bootstrap, trusted publishing linkage, and permission issues when publish fails.
+- Plugin id collision enforcement is now always active at runtime in `Registry.registerPlugin`, including production builds, so duplicate ids cannot silently overwrite existing plugins.
+- `Graph.registerRenderer` and `Graph.unregisterRenderer` now normalize renderer type keys with `trim()` for consistent registration and removal behavior.
+
 ## [0.5.0] - 2026-05-23
 
 ### Added
@@ -374,14 +383,14 @@ All notable changes to this project will be documented in this file.
 - Immutable input mode (`immutableInputs`) using deep freeze.
 - Sampling support (`sampling`) with stride decimation.
 - Scalability options:
-	- dirty-render short-circuiting
-	- static layer caching
-	- optional OffscreenCanvas-backed layer buffers
+ 	- dirty-render short-circuiting
+ 	- static layer caching
+ 	- optional OffscreenCanvas-backed layer buffers
 - Plugin maturity features:
-	- dependency ordering (`before` / `after`)
-	- capability flags for hook dispatch optimization
-	- hook context versioning (`contextVersion`)
-	- optional plugin error boundary sandboxing
+ 	- dependency ordering (`before` / `after`)
+ 	- capability flags for hook dispatch optimization
+ 	- hook context versioning (`contextVersion`)
+ 	- optional plugin error boundary sandboxing
 - New utility exports: `deepFreeze`, `decimatePointsStride`.
 
 ## [0.0.3] - 2026-04-14

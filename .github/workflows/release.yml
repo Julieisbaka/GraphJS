@@ -253,6 +253,13 @@ jobs:
           const fs = require('fs');
           const { execFileSync } = require('child_process');
 
+          function run(command, args, options = {}) {
+            return execFileSync(command, args, {
+              stdio: 'inherit',
+              ...options,
+            });
+          }
+
           const publishFile = process.env.PUBLISH_FILE;
           if (!publishFile || !fs.existsSync(publishFile)) {
             console.log('No publish file found; skipping npm publish.');
@@ -265,11 +272,26 @@ jobs:
             process.exit(0);
           }
 
+          // Quick network/auth sanity check before iterating packages.
+          run('npm', ['ping']);
+
           for (const pkg of packages) {
             console.log(`Publishing ${pkg.name}@${pkg.version} from ${pkg.dir}`);
-            execFileSync('npm', ['publish', '--provenance'], {
-              cwd: pkg.dir,
-              stdio: 'inherit',
-            });
+            try {
+              run('npm', ['publish', '--provenance', '--access', 'public'], {
+                cwd: pkg.dir,
+              });
+            } catch (error) {
+              const status = typeof error.status === 'number' ? error.status : 'unknown';
+              throw new Error(
+                [
+                  `npm publish failed for ${pkg.name}@${pkg.version} (status: ${status}).`,
+                  'Common causes:',
+                  '- The package/scope is not yet bootstrapped on npm (manual first publish required).',
+                  '- Trusted Publishing is not attached to this repo/workflow in npm package settings.',
+                  '- The publishing identity does not have permission for this npm scope.',
+                ].join('\n')
+              );
+            }
           }
           NODE

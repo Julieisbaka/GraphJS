@@ -27,11 +27,12 @@ npm install @julieisbaka/graphjs
 ## Publishing
 
 - The release workflow publishes changed packages from `main` using npm Trusted Publishing via `.github/workflows/release.yml`.
-- The workflow creates release metadata in a JavaScript step, then performs the actual `npm publish --provenance` calls in a dedicated shell step so npm receives the standard GitHub Actions trusted publishing environment.
+- The workflow creates release metadata in a JavaScript step, then performs the actual `npm publish --provenance --access public` calls in a dedicated shell step so npm receives the standard GitHub Actions trusted publishing environment.
 - The root package metadata includes a `repository.url` that must exactly match `https://github.com/Julieisbaka/GraphJS`, so the manifest now uses that plain GitHub URL without a `git+` prefix or trailing `.git`.
 - For a brand-new package on npm, publish it manually once first so the package exists and you can attach npm's GitHub Actions trusted publisher configuration to it.
 - If npm rejects a publish attempt after the workflow has already built the tarball, bump the package version before retrying so the next release uses a fresh semver.
 - After each package is connected to the `julieisbaka/GraphJS` repository and `release.yml` workflow in npm, future version bumps can publish from GitHub Actions without an `NPM_TOKEN` secret.
+- When publish fails, the workflow now surfaces explicit troubleshooting guidance for scope bootstrap, trusted publisher setup, and npm permission issues.
 
 ## Quick Start
 
@@ -143,6 +144,7 @@ Any hook can return `false` to cancel the current stage.
 - Optional capability flags (`hooks`, `needsLayout`, `needsBounds`, `needsData`) for optimized hook dispatch
 - Optional plugin error boundary (`pluginErrorBoundary`) — live-reconfigurable via `graph.setOptions({ pluginErrorBoundary: ... })`
 - Plugin identity hardening: local inline plugins cannot use an id that conflicts with an already-registered global plugin id.
+- Plugin id collision checks are a runtime security boundary and are enforced in both development and production builds.
 
 ## Core API
 
@@ -177,6 +179,8 @@ Any hook can return `false` to cancel the current stage.
 - `Graph.registerRenderer(type, fn)` — register a custom series renderer (e.g. `"bar"`, `"scatter"`)
 - `Graph.unregisterRenderer(type)` — unregister a custom series renderer
 - `Graph.renderers` — `Map<string, fn>` of all registered renderers
+
+Renderer `type` keys are normalized with `trim()` during registration and unregistration.
 - `Graph.registerSampler(name, fn)` — register a custom data sampler
 - `Graph.unregisterSampler(name)` — unregister a custom data sampler
 - `Graph.samplers` — `Map<string, fn>` of all registered samplers

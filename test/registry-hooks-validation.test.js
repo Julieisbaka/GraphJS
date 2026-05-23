@@ -62,6 +62,15 @@ test("Registry: rejects registering a different plugin object under an existing 
   );
 });
 
+test("Registry: allows re-registering the same plugin object under the same id", () => {
+  const reg = new Registry();
+  const plugin = { id: "same" };
+
+  reg.registerPlugin(plugin);
+  assert.doesNotThrow(() => reg.registerPlugin(plugin));
+  assert.strictEqual(reg.getPlugin("same"), plugin);
+});
+
 // ---------------------------------------------------------------------------
 // HookRegistry
 // ---------------------------------------------------------------------------

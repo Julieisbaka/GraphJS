@@ -23,10 +23,11 @@ export class Registry {
       if (!plugin.id || typeof plugin.id !== "string") {
         throw new Error("Plugin must provide a string id.");
       }
-      const existing = this._plugins.get(plugin.id);
-      if (existing && existing !== plugin) {
-        throw new Error(`Plugin id '${plugin.id}' is already registered.`);
-      }
+    }
+
+    const existing = this._plugins.get(plugin.id);
+    if (existing && existing !== plugin) {
+      throw new Error(`Plugin id '${plugin.id}' is already registered.`);
     }
     this._plugins.set(plugin.id, plugin);
   }

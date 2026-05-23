@@ -85,7 +85,7 @@ export class Graph {
     if (typeof fn !== "function") {
       throw new Error(`Renderer for '${type}' must be a function.`);
     }
-    Graph.renderers.set(type, fn);
+    Graph.renderers.set(type.trim(), fn);
   }
 
   /**
@@ -98,7 +98,7 @@ export class Graph {
     if (typeof type !== "string" || !type.trim()) {
       throw new Error("Renderer type must be a non-empty string.");
     }
-    Graph.renderers.delete(type);
+    Graph.renderers.delete(type.trim());
   }
 
   /**

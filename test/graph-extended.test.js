@@ -46,6 +46,13 @@ test("Graph.registerRenderer: validates type and function arguments", () => {
   assert.throws(() => Graph.registerRenderer("ok", null), /must be a function/);
 });
 
+test("Graph.registerRenderer: trims whitespace from type on registration and unregistration", () => {
+  Graph.registerRenderer("  padded-renderer  ", () => {});
+  assert.equal(Graph.renderers.has("padded-renderer"), true);
+  Graph.unregisterRenderer(" padded-renderer ");
+  assert.equal(Graph.renderers.has("padded-renderer"), false);
+});
+
 test("Graph.registerSampler: validates name and function arguments", () => {
   assert.throws(() => Graph.registerSampler("", () => []), /non-empty string/);
   assert.throws(() => Graph.registerSampler("ok", null), /must be a function/);

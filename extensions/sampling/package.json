@@ -1,0 +1,46 @@
+{
+  "name": "@julieisbaka/graphjs-extension-sampling",
+  "version": "0.0.1",
+  "description": "First-party sampling extension for GraphJS. Registers LTTB, M4, RDP, LTD, LTOB, and SMA samplers.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./common": "./common.js"
+  },
+  "files": [
+    "index.js",
+    "common.js",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE.md"
+  ],
+  "keywords": [
+    "graphjs",
+    "extension",
+    "sampling",
+    "lttb",
+    "m4",
+    "rdp",
+    "ltob",
+    "ltd",
+    "sma",
+    "downsampling",
+    "plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Julieisbaka/GraphJS"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@julieisbaka/graphjs": ">=0.5.0"
+  },
+  "scripts": {
+    "lint": "node --check index.js common.js",
+    "build": "esbuild index.js --bundle --format=esm --outfile=dist/index.js && esbuild index.js --bundle --format=esm --minify --outfile=dist/index.min.js"
+  }
+}
