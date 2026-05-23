@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3] - 2026-05-23
+
+### Changed
+
+- Bumped the core package patch version to provide a unique npm publish target after a failed publish attempt on `0.5.2`.
+
 ## [0.5.2] - 2026-05-23
 
 ### Changed

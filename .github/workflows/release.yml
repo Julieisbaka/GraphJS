@@ -256,8 +256,75 @@ jobs:
           function run(command, args, options = {}) {
             return execFileSync(command, args, {
               stdio: 'inherit',
+              encoding: 'utf8',
               ...options,
             });
+          }
+
+          function extractNpmLogPath(output) {
+            const text = typeof output === 'string' ? output : '';
+            const match = text.match(/A complete log of this run can be found in:\s*(.+)/i);
+            return match ? match[1].trim() : null;
+          }
+
+          function readNpmDebugLog(logPath) {
+            if (!logPath) {
+              return null;
+            }
+            try {
+              if (!fs.existsSync(logPath)) {
+                return null;
+              }
+              return fs.readFileSync(logPath, 'utf8');
+            } catch {
+              return null;
+            }
+          }
+
+          function publishPackage(pkg) {
+            try {
+              const stdout = execFileSync('npm', ['publish', '--provenance', '--access', 'public'], {
+                cwd: pkg.dir,
+                stdio: ['ignore', 'pipe', 'pipe'],
+                encoding: 'utf8',
+              });
+              if (stdout) {
+                process.stdout.write(stdout);
+              }
+              return;
+            } catch (error) {
+              const status = typeof error.status === 'number' ? error.status : 'unknown';
+              const stdout = typeof error.stdout === 'string' ? error.stdout : '';
+              const stderr = typeof error.stderr === 'string' ? error.stderr : '';
+              const combined = `${stdout}\n${stderr}`;
+              const logPath = extractNpmLogPath(combined);
+              const debugLog = readNpmDebugLog(logPath);
+
+              if (stdout) {
+                process.stdout.write(stdout);
+              }
+              if (stderr) {
+                process.stderr.write(stderr);
+              }
+
+              throw new Error(
+                [
+                  `npm publish failed for ${pkg.name}@${pkg.version} (status: ${status}).`,
+                  '',
+                  'Captured npm stderr excerpt:',
+                  stderr || '(none)',
+                  '',
+                  logPath ? `npm debug log path: ${logPath}` : 'npm debug log path: not detected',
+                  debugLog ? `--- npm debug log start ---\n${debugLog}\n--- npm debug log end ---` : 'npm debug log content: unavailable',
+                  '',
+                  'Common causes:',
+                  '- Publish was attempted without --access public (publishConfig.access alone may not control endpoint routing).',
+                  '- The package/scope is not yet bootstrapped on npm (manual first publish required).',
+                  '- Trusted Publishing is not attached to this repo/workflow in npm package settings.',
+                  '- The publishing identity does not have permission for this npm scope.',
+                ].join('\n')
+              );
+            }
           }
 
           const publishFile = process.env.PUBLISH_FILE;
@@ -277,22 +344,6 @@ jobs:
 
           for (const pkg of packages) {
             console.log(`Publishing ${pkg.name}@${pkg.version} from ${pkg.dir}`);
-            try {
-              run('npm', ['publish', '--provenance', '--access', 'public'], {
-                cwd: pkg.dir,
-              });
-            } catch (error) {
-              const status = typeof error.status === 'number' ? error.status : 'unknown';
-              throw new Error(
-                [
-                  `npm publish failed for ${pkg.name}@${pkg.version} (status: ${status}).`,
-                  'Common causes:',
-                  '- Publish was attempted without --access public (publishConfig.access alone may not control endpoint routing).',
-                  '- The package/scope is not yet bootstrapped on npm (manual first publish required).',
-                  '- Trusted Publishing is not attached to this repo/workflow in npm package settings.',
-                  '- The publishing identity does not have permission for this npm scope.',
-                ].join('\n')
-              );
-            }
+            publishPackage(pkg);
           }
           NODE
