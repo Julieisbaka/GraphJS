@@ -50,6 +50,18 @@ test("Registry: unregisterPlugin is a no-op for unknown ids", () => {
   assert.doesNotThrow(() => reg.unregisterPlugin("never-registered"));
 });
 
+test("Registry: rejects registering a different plugin object under an existing id", () => {
+  const reg = new Registry();
+  const a1 = { id: "dup" };
+  const a2 = { id: "dup" };
+
+  reg.registerPlugin(a1);
+  assert.throws(
+    () => reg.registerPlugin(a2),
+    /already registered/
+  );
+});
+
 // ---------------------------------------------------------------------------
 // HookRegistry
 // ---------------------------------------------------------------------------

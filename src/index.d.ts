@@ -123,6 +123,21 @@ export type AfterInitHookContext = HookContextBase & {
   options: GraphOptions;
 };
 
+export type OnStateChangeHookContext = HookContextBase & {
+  hookName: "onStateChange";
+  pluginId: string;
+  previousState: Record<string, unknown>;
+  nextState: Record<string, unknown>;
+  partialState: Record<string, unknown>;
+};
+
+export type OnPluginEventHookContext = HookContextBase & {
+  hookName: "onPluginEvent";
+  pluginId: string;
+  eventName: string;
+  eventContext: Record<string, unknown>;
+};
+
 export type BeforeSetDataHookContext = HookContextBase & {
   hookName: "beforeSetData";
   nextData: unknown;
@@ -199,6 +214,8 @@ export type AfterDestroyHookContext = HookContextBase & {
 export type BuiltinHookContextMap = {
   beforeInit: BeforeInitHookContext;
   afterInit: AfterInitHookContext;
+  onStateChange: OnStateChangeHookContext;
+  onPluginEvent: OnPluginEventHookContext;
   beforeSetData: BeforeSetDataHookContext;
   afterSetData: AfterSetDataHookContext;
   beforeLayout: BeforeLayoutHookContext;
@@ -241,6 +258,14 @@ export type PluginApi = {
   unregisterCommand(commandName: string): void;
   listCommands(): GraphCommandEntry[];
   executeCommand(commandName: string, payload?: unknown): unknown;
+  requestRender(): void;
+  emit(hookName: string, context?: Record<string, unknown>): boolean;
+  getOptions(): GraphOptions;
+  setOptions(options: GraphOptions): void;
+  getDomain(): DomainOverride;
+  setDomain(domain: DomainOverride): void;
+  getPlugin(pluginId: string): GraphPlugin | undefined;
+  listPlugins(): GraphPlugin[];
 };
 
 export type GraphPlugin = {
@@ -305,8 +330,11 @@ export class Graph {
     static samplers: Map<string, GraphSeriesSampler>;
   static registerPlugin(plugin: GraphPlugin): void;
   static unregisterPlugin(pluginId: string): void;
+  static listPlugins(): GraphPlugin[];
   static registerRenderer(type: string, renderer: GraphSeriesRenderer): void;
+  static unregisterRenderer(type: string): void;
   static registerSampler(name: string, sampler: GraphSeriesSampler): void;
+  static unregisterSampler(name: string): void;
 
   constructor(canvasTarget: string | HTMLCanvasElement, options?: GraphOptions);
 
@@ -320,6 +348,7 @@ export class Graph {
 
   setData(series: Series[]): this;
   addSeries(series: Series): this;
+  getSeriesById(seriesId: string): Series | undefined;
   clear(): this;
   resize(width: number, height: number): this;
   render(args?: { force?: boolean }): this;

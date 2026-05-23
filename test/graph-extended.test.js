@@ -55,8 +55,26 @@ test("Graph static registry: registerPlugin / unregisterPlugin", () => {
   const plugin = { id: "static-test-plugin" };
   Graph.registerPlugin(plugin);
   assert.strictEqual(Graph.registry.getPlugin("static-test-plugin"), plugin);
+  assert.ok(Graph.listPlugins().includes(plugin));
   Graph.unregisterPlugin("static-test-plugin");
   assert.equal(Graph.registry.getPlugin("static-test-plugin"), undefined);
+});
+
+test("Graph.unregisterRenderer and Graph.unregisterSampler remove custom registrars", () => {
+  const rendererName = "test-custom-renderer";
+  const samplerName = "test-custom-sampler";
+
+  Graph.registerRenderer(rendererName, () => {});
+  Graph.registerSampler(samplerName, (points) => points);
+
+  assert.equal(Graph.renderers.has(rendererName), true);
+  assert.equal(Graph.samplers.has(samplerName), true);
+
+  Graph.unregisterRenderer(rendererName);
+  Graph.unregisterSampler(samplerName);
+
+  assert.equal(Graph.renderers.has(rendererName), false);
+  assert.equal(Graph.samplers.has(samplerName), false);
 });
 
 // ---------------------------------------------------------------------------
@@ -112,6 +130,18 @@ test("Graph.addSeries: appends a series and re-normalizes data", () => {
   graph.setData([{ id: "a", points: [] }]);
   graph.addSeries({ id: "b", points: [{ x: 0, y: 0 }] });
   assert.deepEqual(graph.data.map((s) => s.id), ["a", "b"]);
+});
+
+test("Graph.getSeriesById: returns matching series or undefined", () => {
+  const { graph } = createGraph();
+  graph.setData([
+    { id: "alpha", points: [{ x: 0, y: 0 }] },
+    { id: "beta", points: [{ x: 1, y: 1 }] }
+  ]);
+
+  assert.equal(graph.getSeriesById("alpha")?.id, "alpha");
+  assert.equal(graph.getSeriesById("missing"), undefined);
+  assert.throws(() => graph.getSeriesById(""), /Series id must be a non-empty string/);
 });
 
 // ---------------------------------------------------------------------------

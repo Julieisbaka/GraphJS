@@ -89,6 +89,20 @@ test("PluginHost.configure: throws Unknown plugin when id is not in registry", (
   assert.throws(() => host.configure(["never-registered"]), /Unknown plugin: never-registered/);
 });
 
+test("PluginHost.configure: rejects local plugin id collision with a globally registered plugin", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  registry.registerPlugin({ id: "official-plugin" });
+
+  assert.throws(
+    () => host.configure([{ plugin: { id: "official-plugin", install() {} } }]),
+    /conflicts with a globally registered plugin/
+  );
+});
+
 test("PluginHost.configure: skips falsy entries and tolerates empty input", () => {
   const registry = new Registry();
   const hooks = new HookRegistry();
@@ -573,6 +587,67 @@ test("PluginHost.getPluginApi: requestRender, getOptions/setOptions, getDomain/s
 
   const found = api.getPlugin("registered");
   assert.equal(found.id, "registered");
+
+  assert.equal(api.listPlugins().length >= 1, true);
+});
+
+test("PluginHost hooks: onStateChange fires when setState is called", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  let captured = null;
+  host.configure([
+    {
+      id: "observer",
+      hooks: {
+        onStateChange(_graph, context) {
+          captured = context;
+        }
+      }
+    },
+    {
+      id: "emitter",
+      install(_graph, _options, api) {
+        api.setState({ active: true });
+      }
+    }
+  ]);
+
+  assert.equal(captured.pluginId, "emitter");
+  assert.deepEqual(captured.previousState, {});
+  assert.deepEqual(captured.partialState, { active: true });
+  assert.deepEqual(captured.nextState, { active: true });
+});
+
+test("PluginHost hooks: onPluginEvent fires when emit is called", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+
+  let captured = null;
+  host.configure([
+    {
+      id: "observer",
+      hooks: {
+        onPluginEvent(_graph, context) {
+          captured = context;
+        }
+      }
+    },
+    {
+      id: "emitter",
+      install(_graph, _options, api) {
+        api.emit("custom-event", { payload: 123 });
+      }
+    }
+  ]);
+
+  assert.equal(captured.pluginId, "emitter");
+  assert.equal(captured.eventName, "custom-event");
+  assert.deepEqual(captured.eventContext, { payload: 123 });
 });
 
 test("PluginHost.configure: clears commands for plugins removed on reconfigure", () => {

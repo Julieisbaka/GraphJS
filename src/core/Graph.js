@@ -63,6 +63,15 @@ export class Graph {
   }
 
   /**
+   * Lists all globally registered plugins.
+   *
+   * @returns {import("../index.d.ts").GraphPlugin[]}
+   */
+  static listPlugins() {
+    return Graph.registry.listPlugins();
+  }
+
+  /**
    * Registers a renderer function for a series type.
    *
    * @param {string} type - Series type key.
@@ -80,6 +89,19 @@ export class Graph {
   }
 
   /**
+   * Unregisters a renderer function for a series type.
+   *
+   * @param {string} type - Series type key.
+   * @returns {void}
+   */
+  static unregisterRenderer(type) {
+    if (typeof type !== "string" || !type.trim()) {
+      throw new Error("Renderer type must be a non-empty string.");
+    }
+    Graph.renderers.delete(type);
+  }
+
+  /**
    * Registers a point sampling strategy by name.
    *
    * @param {string} name - Sampler name.
@@ -94,6 +116,19 @@ export class Graph {
       throw new Error(`Sampler '${name}' must be a function.`);
     }
     Graph.samplers.set(name.trim(), fn);
+  }
+
+  /**
+   * Unregisters a point sampling strategy by name.
+   *
+   * @param {string} name - Sampler name.
+   * @returns {void}
+   */
+  static unregisterSampler(name) {
+    if (typeof name !== "string" || !name.trim()) {
+      throw new Error("Sampler name must be a non-empty string.");
+    }
+    Graph.samplers.delete(name.trim());
   }
 
   /**
@@ -332,6 +367,21 @@ export class Graph {
   addSeries(series) {
     this.setData([...this.data, series]);
     return this;
+  }
+
+  /**
+   * Returns the first series with the provided id.
+   *
+   * @param {string} seriesId - Series id to find.
+   * @returns {import("../index.d.ts").Series|undefined}
+   */
+  getSeriesById(seriesId) {
+    if (typeof __DEV__ === "undefined" || __DEV__) {
+      if (typeof seriesId !== "string" || !seriesId.trim()) {
+        throw new Error("Series id must be a non-empty string.");
+      }
+    }
+    return this.data.find((series) => series.id === seriesId);
   }
 
   /**

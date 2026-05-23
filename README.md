@@ -22,6 +22,7 @@ npm install @julieisbaka/graphjs
 ## Development
 
 - Run the test suite with `npm test`. The test script uses a small Node launcher that discovers `test/*.test.js` files and forwards them to Node's test runner, avoiding shell glob differences and the Node 22 CI issue where `node --test test` can be treated like a missing module path.
+- Run `npm run build` to produce a non-bundled ESM `dist/` output. GraphJS intentionally does not ship a pre-bundled runtime build so application developers can bundle and optimize the library in their own project pipeline.
 
 ## Publishing
 
@@ -127,6 +128,7 @@ const myPlugin = {
 ### Built-in lifecycle hooks
 
 - `beforeInit`, `afterInit`
+- `onStateChange`, `onPluginEvent`
 - `beforeSetData`, `afterSetData`
 - `beforeLayout`, `afterLayout`
 - `beforeRender`, `beforeDrawSeries`, `afterDrawSeries`, `afterRender`
@@ -140,6 +142,7 @@ Any hook can return `false` to cancel the current stage.
 - Dependency-aware plugin ordering via `before` / `after`
 - Optional capability flags (`hooks`, `needsLayout`, `needsBounds`, `needsData`) for optimized hook dispatch
 - Optional plugin error boundary (`pluginErrorBoundary`) — live-reconfigurable via `graph.setOptions({ pluginErrorBoundary: ... })`
+- Plugin identity hardening: local inline plugins cannot use an id that conflicts with an already-registered global plugin id.
 
 ## Core API
 
@@ -154,6 +157,7 @@ Any hook can return `false` to cancel the current stage.
 - `graph.setBoundsStrategy(fn)`
 - `graph.setData(series[])`
 - `graph.addSeries(series)`
+- `graph.getSeriesById(seriesId)`
 - `graph.resize(width, height)`
 - `graph.render({ force?: boolean })`
 - `graph.clear()`
@@ -169,9 +173,12 @@ Any hook can return `false` to cancel the current stage.
 
 - `Graph.registerPlugin(plugin)` — add a plugin to the global registry
 - `Graph.unregisterPlugin(pluginId)` — remove a plugin from the global registry
+- `Graph.listPlugins()` — list all globally registered plugins
 - `Graph.registerRenderer(type, fn)` — register a custom series renderer (e.g. `"bar"`, `"scatter"`)
+- `Graph.unregisterRenderer(type)` — unregister a custom series renderer
 - `Graph.renderers` — `Map<string, fn>` of all registered renderers
 - `Graph.registerSampler(name, fn)` — register a custom data sampler
+- `Graph.unregisterSampler(name)` — unregister a custom data sampler
 - `Graph.samplers` — `Map<string, fn>` of all registered samplers
 
 ### Notable core options

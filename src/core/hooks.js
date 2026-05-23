@@ -8,6 +8,8 @@ import { freeze } from "./utils.js";
 export const BUILTIN_HOOKS = freeze([
   "beforeInit",
   "afterInit",
+  "onStateChange",
+  "onPluginEvent",
   "beforeSetData",
   "afterSetData",
   "beforeLayout",

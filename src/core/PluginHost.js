@@ -206,12 +206,11 @@ export class PluginHost {
    * @returns {void}
    */
   configure(pluginEntries = []) {
-    const incomingIds = new Set(
-      pluginEntries
-        .map(normalizePluginConfig)
-        .filter(Boolean)
-        .map((entry) => entry.id)
-    );
+    const parsedEntries = pluginEntries
+      .map(normalizePluginConfig)
+      .filter(Boolean);
+
+    const incomingIds = new Set(parsedEntries.map((entry) => entry.id));
 
     for (const existingPluginId of this.pluginStates.keys()) {
       if (!incomingIds.has(existingPluginId)) {
@@ -219,14 +218,23 @@ export class PluginHost {
       }
     }
 
-    const normalized = pluginEntries
-      .map(normalizePluginConfig)
-      .filter(Boolean)
+    const seenIds = new Set();
+    const normalized = parsedEntries
       .map((entry) => {
-        const plugin = entry.plugin || this.registry.getPlugin(entry.id);
+        const registeredPlugin = this.registry.getPlugin(entry.id);
+        if (entry.plugin && registeredPlugin && registeredPlugin !== entry.plugin) {
+          throw new Error(`Plugin id '${entry.id}' conflicts with a globally registered plugin.`);
+        }
+
+        const plugin = entry.plugin || registeredPlugin;
         if (!plugin) {
           throw new Error(`Unknown plugin: ${entry.id}`);
         }
+
+        if (seenIds.has(plugin.id)) {
+          throw new Error(`Duplicate plugin id in graph configuration: ${plugin.id}`);
+        }
+        seenIds.add(plugin.id);
 
         if (typeof __DEV__ === "undefined" || __DEV__) validatePluginContract(plugin);
 
@@ -295,7 +303,14 @@ export class PluginHost {
       },
       setState(partialState) {
         const current = host.pluginStates.get(pluginId) || {};
-        host.pluginStates.set(pluginId, { ...current, ...partialState });
+        const nextState = { ...current, ...partialState };
+        host.pluginStates.set(pluginId, nextState);
+        host.call("onStateChange", {
+          pluginId,
+          previousState: current,
+          nextState,
+          partialState
+        });
       },
       registerHook(hookName) {
         host.hookRegistry.register(hookName);
@@ -306,10 +321,23 @@ export class PluginHost {
       unregisterCommand(commandName) {
         host.graph.unregisterCommand(commandName);
       },
+      listCommands() {
+        return host.graph.listCommands();
+      },
+      executeCommand(commandName, payload) {
+        return host.graph.executeCommand(commandName, payload);
+      },
       requestRender() {
         host.graph.render();
       },
       emit(hookName, context = {}) {
+        if (hookName !== "onPluginEvent") {
+          host.call("onPluginEvent", {
+            pluginId,
+            eventName: hookName,
+            eventContext: context
+          });
+        }
         return host.call(hookName, context);
       },
       getOptions() {
@@ -326,6 +354,9 @@ export class PluginHost {
       },
       getPlugin(id) {
         return host.registry.getPlugin(id);
+      },
+      listPlugins() {
+        return host.registry.listPlugins();
       }
     });
   }

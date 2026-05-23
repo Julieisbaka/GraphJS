@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-05-23
+
+### Added
+
+- New built-in plugin hooks: `onStateChange` and `onPluginEvent`.
+- `Graph.listPlugins()` to list globally registered plugins.
+- `Graph.unregisterRenderer(type)` to unregister a custom series renderer.
+- `Graph.unregisterSampler(name)` to unregister a custom data sampler.
+- `graph.getSeriesById(seriesId)` to read a series by id from the current graph data.
+
+### Changed
+
+- The root `npm run build` pipeline is now configured as a non-bundling build that emits ESM files to `dist/` and leaves final bundling to consuming applications.
+
+### Fixed
+
+- Hardened plugin identity checks to prevent local inline plugins from using an id that conflicts with a globally registered plugin.
+- `Registry.registerPlugin` now rejects registering a different plugin object under an already-registered plugin id.
+
 ## [0.4.9] - 2026-05-23
 
 ### Changed
