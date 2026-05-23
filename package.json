@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "A zero-dependency, lightweight JavaScript graphing core with powerful plugin hooks.",
   "type": "module",
   "main": "./src/index.js",

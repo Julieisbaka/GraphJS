@@ -94,6 +94,9 @@ test("setDomain validation boundaries: accepts valid domains and rejects invalid
     /finite number/
   );
 
+  graph.setDomain({});
+  assert.equal(graph.getDomain(), null);
+
   graph.clearDomain();
   assert.equal(graph.getDomain(), null);
 });

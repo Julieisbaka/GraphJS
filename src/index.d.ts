@@ -313,6 +313,7 @@ export class Graph {
   setOptions(options: GraphOptions): this;
   getOptions(): GraphOptions;
   setDomain(domain: DomainOverride): this;
+  /** @deprecated Use setDomain({}) to clear the active domain override. */
   clearDomain(): this;
   getDomain(): DomainOverride;
   setBoundsStrategy(fn: BoundsStrategy | null): this;

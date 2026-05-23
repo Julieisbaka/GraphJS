@@ -148,8 +148,8 @@ Any hook can return `false` to cancel the current stage.
 - `new Graph(canvasOrSelector, options)`
 - `graph.setOptions(options)`
 - `graph.getOptions()`
-- `graph.setDomain(domain)`
-- `graph.clearDomain()`
+- `graph.setDomain(domain)` (pass `{}` to clear domain override)
+- `graph.clearDomain()` (deprecated, kept for backwards compatibility)
 - `graph.getDomain()`
 - `graph.setBoundsStrategy(fn)`
 - `graph.setData(series[])`
@@ -162,6 +162,8 @@ Any hook can return `false` to cancel the current stage.
 - `graph.unregisterCommand(name)`
 - `graph.executeCommand(name, payload?)`
 - `graph.listCommands()`
+
+`graph.clearDomain()` is deprecated and kept for backwards compatibility. Prefer `graph.setDomain({})` to clear the active domain override.
 
 ### Static methods and registries
 

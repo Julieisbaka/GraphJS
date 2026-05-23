@@ -189,13 +189,21 @@ export class Graph {
    */
   setDomain(domain = null) {
     if (typeof __DEV__ === "undefined" || __DEV__) validateDomain(domain);
-    this.options.domain = domain;
+    const isEmptyDomainObject = domain
+      && typeof domain === "object"
+      && !Number.isFinite(domain.xMin)
+      && !Number.isFinite(domain.xMax)
+      && !Number.isFinite(domain.yMin)
+      && !Number.isFinite(domain.yMax);
+    this.options.domain = isEmptyDomainObject ? null : domain;
     this._dirty |= DIRTY_OPTIONS | DIRTY_RENDER;
     return this;
   }
 
   /**
    * Clears any active domain override.
+   *
+   * @deprecated Use setDomain({}) to clear the active domain override.
    *
    * @returns {this}
    */

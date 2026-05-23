@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.9] - 2026-05-23
+
+### Changed
+
+- `graph.clearDomain()` is now deprecated and retained for backwards compatibility; this compatibility alias has no package-size impact unless it is explicitly referenced by consumer code.
+- Clearing the active domain can now be done with `graph.setDomain({})`, which is normalized to `null` internally.
+- The deprecated `graph.clearDomain()` alias remains available and delegates to `setDomain`.
+
 ## [0.4.8] - 2026-04-25
 
 ### Fixed
