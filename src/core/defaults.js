@@ -28,6 +28,10 @@ export const DEFAULT_OPTIONS = freeze({
     layerCaching: true,
     useOffscreenCanvas: true
   },
+  sorting: {
+    enabled: false
+  },
+  autoResize: false,
   pluginErrorBoundary: {
     enabled: true,
     onError: null

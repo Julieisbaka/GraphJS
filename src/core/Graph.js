@@ -162,9 +162,26 @@ export class Graph {
     this._destroyed = false;
     this._boundsStrategy = null;
 
+    // Keyboard accessibility state
+    this._focusedSeriesIdx = 0;
+    this._focusedPointIdx = 0;
+    this._onKeyDown = this._handleKeyDown.bind(this);
+    this.canvas.setAttribute("tabindex", "0");
+    this.canvas.setAttribute("role", "application");
+    this.canvas.setAttribute("aria-label", "Graph with no data.");
+    this.canvas.addEventListener("keydown", this._onKeyDown);
+
+    // ResizeObserver for autoResize
+    this._resizeObserver = null;
+
     this.plugins.configure(this.options.plugins || []);
     this.plugins.call("beforeInit", { options: this.options });
     this.resize(this.options.width, this.options.height);
+
+    if (this.options.autoResize) {
+      this._attachResizeObserver();
+    }
+
     this.plugins.call("afterInit", { options: this.options });
   }
 
@@ -187,6 +204,19 @@ export class Graph {
 
     if (Array.isArray(nextOptions.plugins)) {
       this.plugins.configure(nextOptions.plugins);
+    }
+
+    if ("autoResize" in nextOptions) {
+      if (this.options.autoResize) {
+        if (!this._resizeObserver) {
+          this._attachResizeObserver();
+        }
+      } else {
+        if (this._resizeObserver) {
+          this._resizeObserver.disconnect();
+          this._resizeObserver = null;
+        }
+      }
     }
 
     this._dirty |= DIRTY_OPTIONS | DIRTY_RENDER;
@@ -351,9 +381,19 @@ export class Graph {
     }
 
     const normalized = normalizeSeriesData(payload.nextData, this.options.series || {});
+
+    if (this.options.sorting.enabled) {
+      for (const s of normalized) {
+        if (Array.isArray(s.points)) {
+          s.points = s.points.slice().sort((a, b) => a.x - b.x);
+        }
+      }
+    }
+
     this.data = (typeof __DEV__ === "undefined" || __DEV__) && this.options.immutableInputs ? deepFreeze(normalized) : normalized;
 
     this._dirty |= DIRTY_DATA | DIRTY_RENDER;
+    this._updateAriaLabel();
     this.plugins.call("afterSetData", { data: this.data });
     return this;
   }
@@ -612,8 +652,102 @@ export class Graph {
     this.plugins.call("beforeDestroy", {});
     this.clear();
     this.commands.clear();
+    this.canvas.removeEventListener("keydown", this._onKeyDown);
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+      this._resizeObserver = null;
+    }
     this._destroyed = true;
     this.plugins.call("afterDestroy", {});
+  }
+
+  /**
+   * Attaches a ResizeObserver to the canvas parent for automatic resizing.
+   *
+   * @returns {void}
+   */
+  _attachResizeObserver() {
+    const target = this.canvas.parentElement;
+    if (!target || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    this._resizeObserver = new ResizeObserver((entries) => {
+      if (this._destroyed) return;
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          this.resize(Math.floor(width), Math.floor(height));
+          this.render();
+        }
+      }
+    });
+    this._resizeObserver.observe(target);
+  }
+
+  /**
+   * Updates the canvas aria-label to reflect the currently focused data point.
+   *
+   * @returns {void}
+   */
+  _updateAriaLabel() {
+    const visible = filterVisibleSeries(this.data).filter((s) => s.points && s.points.length > 0);
+    if (!visible.length) {
+      this.canvas.setAttribute("aria-label", "Graph with no data.");
+      return;
+    }
+    const si = Math.min(this._focusedSeriesIdx, visible.length - 1);
+    const series = visible[si];
+    const pi = Math.min(this._focusedPointIdx, series.points.length - 1);
+    const point = series.points[pi];
+    const seriesLabel = series.id ? `Series "${series.id}"` : `Series ${si + 1}`;
+    this.canvas.setAttribute(
+      "aria-label",
+      `Graph. ${seriesLabel}, point ${pi + 1} of ${series.points.length}: x = ${point.x}, y = ${point.y}. Use arrow keys to navigate.`
+    );
+  }
+
+  /**
+   * Handles keyboard navigation for accessible data point traversal.
+   *
+   * @param {KeyboardEvent} e - Keyboard event.
+   * @returns {void}
+   */
+  _handleKeyDown(e) {
+    const visible = filterVisibleSeries(this.data).filter((s) => s.points && s.points.length > 0);
+    if (!visible.length) return;
+
+    const si = Math.min(this._focusedSeriesIdx, visible.length - 1);
+    let consumed = true;
+
+    switch (e.key) {
+      case "ArrowRight":
+        this._focusedSeriesIdx = si;
+        this._focusedPointIdx = Math.min(this._focusedPointIdx + 1, visible[si].points.length - 1);
+        break;
+      case "ArrowLeft":
+        this._focusedSeriesIdx = si;
+        this._focusedPointIdx = Math.max(this._focusedPointIdx - 1, 0);
+        break;
+      case "ArrowDown": {
+        const nextSi = Math.min(si + 1, visible.length - 1);
+        this._focusedSeriesIdx = nextSi;
+        this._focusedPointIdx = Math.min(this._focusedPointIdx, visible[nextSi].points.length - 1);
+        break;
+      }
+      case "ArrowUp": {
+        const prevSi = Math.max(si - 1, 0);
+        this._focusedSeriesIdx = prevSi;
+        this._focusedPointIdx = Math.min(this._focusedPointIdx, visible[prevSi].points.length - 1);
+        break;
+      }
+      default:
+        consumed = false;
+    }
+
+    if (consumed) {
+      e.preventDefault();
+      this._updateAriaLabel();
+    }
   }
 }
 

@@ -96,6 +96,11 @@ export function validateGraphOptions(options) {
     assert(typeof options.scalability[key] === "boolean", `scalability.${key}: expected boolean.`);
   }
 
+  assert(typeof options.sorting === "object", "sorting: expected object.");
+  assert(typeof options.sorting.enabled === "boolean", "sorting.enabled: expected boolean.");
+
+  assert(typeof options.autoResize === "boolean", "autoResize: expected boolean.");
+
   assert(typeof options.pluginErrorBoundary === "object", "pluginErrorBoundary: expected object.");
   assert(typeof options.pluginErrorBoundary.enabled === "boolean", "pluginErrorBoundary.enabled: expected boolean.");
   if (options.pluginErrorBoundary.onError != null) {
