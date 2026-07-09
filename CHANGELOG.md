@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2026-07-09
+
+### Fixed
+
+- Updated canvas stubs in `test/graph-core.test.js` and `test/graph-extended.test.js` to include `setAttribute`, `addEventListener`, and `removeEventListener` methods. The `Graph` constructor gained these DOM API calls in `0.6.0` (keyboard accessibility), but the test mocks were not updated, causing 29 test failures in CI.
+
 ## [0.6.0] - 2026-07-04
 
 ### Added
