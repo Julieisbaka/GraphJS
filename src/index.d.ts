@@ -39,6 +39,10 @@ export type SamplingOptions = {
   method: string;
 };
 
+export type SortingOptions = {
+  enabled: boolean;
+};
+
 export type ScalabilityOptions = {
   dirtyRender: boolean;
   layerCaching: boolean;
@@ -64,6 +68,8 @@ export type GraphOptions = {
   domain?: DomainOverride;
     series?: Partial<SeriesDefaults>;
   sampling?: Partial<SamplingOptions>;
+  sorting?: Partial<SortingOptions>;
+  autoResize?: boolean;
   scalability?: Partial<ScalabilityOptions>;
   pluginErrorBoundary?: Partial<PluginErrorBoundaryOptions>;
   axes?: { show?: boolean; color?: string; lineWidth?: number };

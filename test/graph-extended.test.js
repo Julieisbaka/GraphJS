@@ -26,7 +26,10 @@ function createCanvasStub() {
     width: 0,
     height: 0,
     style: {},
-    getContext(kind) { return kind === "2d" ? ctx : null; }
+    getContext(kind) { return kind === "2d" ? ctx : null; },
+    setAttribute() {},
+    addEventListener() {},
+    removeEventListener() {}
   };
   return { canvas, ctx, calls };
 }

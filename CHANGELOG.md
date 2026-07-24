@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-07-04
+
+### Added
+
+- `options.sorting.enabled` — when `true`, each series' points are sorted ascending by `x` inside `setData`. Prevents jagged lines from out-of-order or streaming timestamp data. Sorting is a shallow copy so the caller's arrays are never mutated.
+- `options.autoResize` — when `true`, a `ResizeObserver` is attached to the canvas parent element and `graph.resize()` / `graph.render()` are called automatically whenever the container size changes. The observer is disconnected on `graph.destroy()`. Passing `autoResize: false` via `setOptions` disconnects a previously attached observer; passing `autoResize: true` reattaches it.
+- Keyboard accessibility on the canvas element: `tabindex="0"` and `role="application"` are set on construction so the graph is reachable via keyboard. `aria-label` is kept up-to-date with the currently focused data point and updates on `setData`. Arrow keys navigate data points: Left/Right move through points in the focused series; Up/Down switch between visible series. Default scroll behaviour is suppressed while navigating.
+- `SortingOptions` TypeScript type exported from `src/index.d.ts`.
+
 ## [0.5.3] - 2026-05-23
 
 ### Changed
