@@ -215,8 +215,12 @@ Renderer `type` keys are normalized with `trim()` during registration and unregi
 - `domain` (`{ xMin, xMax, yMin, yMax } | null`): override data-derived bounds
 - `series`: `{ type, color, lineWidth, pointRadius }` — per-graph series defaults applied when a series omits those fields
 - `sampling`: `{ enabled, maxPoints, method }` — `method` is the name of any registered sampler (built-in: `"stride"`)
+- `sorting`: `{ enabled }` — when enabled, points in each series are sorted by ascending `x` during `setData`
+- `autoResize` (boolean): observe the canvas parent element with `ResizeObserver` and automatically `resize()` + `render()` on container size changes
 - `scalability`: `{ dirtyRender, layerCaching, useOffscreenCanvas }`
 - `pluginErrorBoundary`: `{ enabled, onError }` — can be updated live via `graph.setOptions({ pluginErrorBoundary: ... })`
+
+Canvas instances are keyboard-focusable (`tabindex="0"`) and expose an ARIA label that updates as users navigate visible points with arrow keys.
 
 ## Utility exports
 
