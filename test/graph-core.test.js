@@ -32,7 +32,10 @@ function createCanvasStub() {
     style: {},
     getContext(kind) {
       return kind === "2d" ? ctx : null;
-    }
+    },
+    setAttribute() {},
+    addEventListener() {},
+    removeEventListener() {}
   };
 }
 
