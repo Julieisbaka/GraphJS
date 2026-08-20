@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-watermark",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "First-party watermark extension for GraphJS.",
   "type": "module",
   "main": "./index.js",

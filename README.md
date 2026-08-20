@@ -46,16 +46,10 @@ npm install @julieisbaka/graphjs
 
 ## Publishing
 
-- The release workflow publishes changed packages from `main` using npm Trusted Publishing via `.github/workflows/release.yml`.
-- The workflow creates release metadata in a JavaScript step, then performs the actual `npm publish --provenance --access public` calls in a dedicated shell step so npm receives the standard GitHub Actions trusted publishing environment.
-- `--access public` must be explicit for scoped publishes. `publishConfig.access = "public"` is still recommended, but CLI routing can still fall back to private scoped endpoints without the explicit flag.
+- The release workflow creates GitHub releases and uploads built package assets when package metadata changes on `main`.
+- npm publishing is manual and is not performed by `.github/workflows/release.yml`.
 - Manual publish example: `npm publish --provenance --access public`
-- The root package metadata includes a `repository.url` that must exactly match `https://github.com/Julieisbaka/GraphJS`, so the manifest now uses that plain GitHub URL without a `git+` prefix or trailing `.git`.
-- For a brand-new package on npm, publish it manually once first so the package exists and you can attach npm's GitHub Actions trusted publisher configuration to it.
-- If npm rejects a publish attempt after the workflow has already built the tarball, bump the package version before retrying so the next release uses a fresh semver.
-- For retries where the prior version already exists or is no longer publishable, bump at least the patch version (for example `0.5.2` -> `0.5.3`) before rerunning release.
-- After each package is connected to the `julieisbaka/GraphJS` repository and `release.yml` workflow in npm, future version bumps can publish from GitHub Actions without an `NPM_TOKEN` secret.
-- When publish fails, the workflow now surfaces explicit troubleshooting guidance for scope bootstrap, trusted publisher setup, and npm permission issues.
+- `--access public` is recommended for scoped packages, and each package version must be unique before publishing.
 
 ## Quick Start
 

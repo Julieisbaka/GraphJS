@@ -576,6 +576,13 @@ test("PluginHost.getPluginApi: requestRender, getOptions/setOptions, getDomain/s
   api.requestRender();
   assert.equal(graph.renderCalls, 1);
 
+  graph.render = (args) => {
+    graph.renderCalls += 1;
+    graph.lastRenderArgs = args;
+  };
+  api.requestRender();
+  assert.deepEqual(graph.lastRenderArgs, { force: true });
+
   api.setOptions({ background: "#abc" });
   assert.equal(api.getOptions().background, "#abc");
 
@@ -666,6 +673,57 @@ test("PluginHost.configure: clears commands for plugins removed on reconfigure",
   // Only the kept plugin's commands remain.
   const names = graph.listCommands().map((c) => c.name).sort();
   assert.deepEqual(names, ["keep.a"]);
+});
+
+test("PluginHost.configure: tears down active plugins and removes removed state", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+  let installs = 0;
+  let destroys = 0;
+
+  const plugin = {
+    id: "resource",
+    install(_graph, _options, api) {
+      installs += 1;
+      api.setState({ installed: installs });
+    },
+    hooks: {
+      beforeDestroy() {
+        destroys += 1;
+      }
+    }
+  };
+
+  host.configure([
+    plugin,
+    { id: "removed", install(_graph, _options, api) { api.setState({ stale: true }); } }
+  ]);
+  host.configure([plugin]);
+
+  assert.equal(installs, 2, "retained plugin is reinstalled exactly once");
+  assert.equal(destroys, 1, "previous plugin configuration is torn down");
+  assert.deepEqual(host.getPluginApi("resource").getPluginState(), { installed: 2 });
+  assert.equal(host.getPluginApi("removed").getPluginState(), undefined);
+});
+
+test("PluginHost.configure: routes teardown errors through the error boundary", () => {
+  const registry = new Registry();
+  const hooks = new HookRegistry();
+  const graph = createGraphStub();
+  const host = new PluginHost(graph, registry, hooks);
+  let captured = null;
+  host.configureErrorBoundary({ onError(args) { captured = args; } });
+
+  host.configure([{
+    id: "teardown-error",
+    hooks: { beforeDestroy() { throw new Error("cleanup failed"); } }
+  }]);
+  host.configure([]);
+
+  assert.equal(captured.pluginId, "teardown-error");
+  assert.equal(captured.phase, "hook:beforeDestroy");
 });
 
 // ---------------------------------------------------------------------------

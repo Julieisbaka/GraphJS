@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.9] - 2026-08-20
+
+### Fixed
+
+- Fixed watermark rendering to use the hook's plugin API argument instead of an out-of-scope variable.
+
 ## [0.0.8] - 2026-04-25
 
 ### Fixed
