@@ -1,7 +1,7 @@
 {
   "name": "@julieisbaka/graphjs-extension-pan-zoom",
-  "version": "0.0.13",
-  "description": "First-party pan and zoom extension for GraphJS.",
+  "version": "0.1.0",
+  "description": "First-party pan, zoom, tooltip, and cursor extension for GraphJS.",
   "type": "module",
   "main": "./index.js",
   "exports": {
@@ -18,6 +18,8 @@
     "extension",
     "pan",
     "zoom",
+    "tooltip",
+    "cursor",
     "plugin"
   ],
   "repository": {

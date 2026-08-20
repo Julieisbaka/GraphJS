@@ -338,3 +338,48 @@ test("pan-zoom set command: updates enabled flag and clamps zoomStep", () => {
     else globalThis.window = previousWindow;
   }
 });
+
+test("pan-zoom merged controls: panEnabled independently disables wheel and drag", () => {
+  const h = createHarness({ panEnabled: false });
+  try {
+    const before = h.getState().view;
+    h.canvasListeners.get("wheel")({
+      clientX: 50,
+      clientY: 50,
+      deltaY: -1,
+      preventDefault() { throw new Error("pan should be disabled"); }
+    });
+    h.canvasListeners.get("mousedown")({ clientX: 50, clientY: 50, button: 0 });
+    assert.deepEqual(h.getState().view, before);
+    assert.equal(h.getState().pointerDown, false);
+  } finally {
+    h.restore();
+  }
+});
+
+test("pan-zoom merged controls: set accepts independent feature flags and hit radius", () => {
+  const h = createHarness();
+  const commands = new Map();
+  const originalRegister = h.api.registerCommand;
+  h.api.registerCommand = (name, handler) => {
+    commands.set(name, handler);
+    return originalRegister(name, handler);
+  };
+  try {
+    // Reinstall with the command spy; the harness remains intentionally small.
+    panZoomPlugin.install(h.graph, h.options, h.api);
+    const result = commands.get("set")({ panEnabled: false, tooltipEnabled: false, hitRadius: 0 });
+    assert.equal(h.options.panEnabled, false);
+    assert.equal(h.options.tooltipEnabled, false);
+    assert.equal(h.options.hitRadius, 1);
+    assert.deepEqual(result, {
+      enabled: true,
+      zoomStep: 0.5,
+      panEnabled: false,
+      tooltipEnabled: false,
+      hitRadius: 1
+    });
+  } finally {
+    h.restore();
+  }
+});

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0] - 2026-08-20
+
+### Added
+
+- Merged tooltip-cursor hover guides, nearest-point highlighting, and tooltip rendering into the pan-zoom plugin.
+- Added independent `panEnabled` and `tooltipEnabled` options while retaining `enabled` as the master switch.
+- Added tooltip configuration to `pan-zoom.set`.
+
 ## [0.0.13] - 2026-04-25
 
 ### Fixed

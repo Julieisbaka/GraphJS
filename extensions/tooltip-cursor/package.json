@@ -1,7 +1,7 @@
 {
   "name": "@julieisbaka/graphjs-extension-tooltip-cursor",
-  "version": "0.0.9",
-  "description": "First-party tooltip + cursor extension for GraphJS.",
+  "version": "0.0.10",
+  "description": "Compatibility tooltip + cursor extension for GraphJS; use pan-zoom for new installations.",
   "type": "module",
   "main": "./index.js",
   "exports": {

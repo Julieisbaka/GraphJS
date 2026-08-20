@@ -254,7 +254,7 @@ First-party extensions live at `extensions/` in this workspace and are published
 - `@julieisbaka/graphjs-extension-legend`
 - `@julieisbaka/graphjs-extension-pan-zoom`
 - `@julieisbaka/graphjs-extension-time-scale`
-- `@julieisbaka/graphjs-extension-tooltip-cursor`
+- `@julieisbaka/graphjs-extension-tooltip-cursor` (compatibility package; tooltip cursor is included in pan-zoom)
 - `@julieisbaka/graphjs-extension-watermark`
 - `@julieisbaka/graphjs-extension-sampling`
 

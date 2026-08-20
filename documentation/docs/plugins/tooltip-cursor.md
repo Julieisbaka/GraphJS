@@ -1,4 +1,4 @@
-# Tooltip Cursor Plugin
+# Tooltip Cursor Plugin (Compatibility)
 
 ## Package
 
@@ -7,7 +7,10 @@
 
 ## Description
 
-Provides hover guides, nearest-point highlighting, and tooltip rendering for active cursor position.
+Tooltip cursor behavior is now included in the `pan-zoom` plugin. The
+standalone package and `tooltip-cursor` plugin remain supported for existing
+applications; new applications can use `panZoomPlugin` from the pan-zoom
+package and set `tooltipEnabled: true`.
 
 ## Default Options
 
