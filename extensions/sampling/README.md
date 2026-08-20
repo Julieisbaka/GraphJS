@@ -20,6 +20,15 @@ const graph = new Graph("#graph", {
 });
 ```
 
+Sampling is viewport-aware by default. Points outside the visible x-range are
+excluded before sampling, with boundary-nearest points retained. The target is
+limited by `maxPoints` and adapts to plot width using `pointsPerPixel`.
+Set `sampling.viewport: false` to sample the complete series.
+
+Order-dependent samplers require points sorted by ascending `x`; duplicate x
+values are valid. The core passes an optional third sampler context containing
+the current bounds, layout, scales, visible range, and target.
+
 ## Samplers
 
 | Name   | Description |

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { lttb, m4, rdp, ltd, ltob, sma } from "../extensions/sampling/index.js";
 import { triangleArea, splitBuckets } from "../extensions/sampling/common.js";
 import { samplingPlugin } from "../extensions/sampling/index.js";
+import { Graph } from "../src/core/Graph.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -76,6 +77,14 @@ test("lttb – returns copy when maxPoints >= length", () => {
 test("lttb – returns copy when maxPoints < 3", () => {
   const pts = sinPoints(50);
   assert.equal(lttb(pts, 2).length, 50);
+});
+
+test("sorted samplers reject descending x-values", () => {
+  assert.throws(
+    () => lttb([{ x: 2, y: 0 }, { x: 1, y: 1 }, { x: 3, y: 2 }], 2),
+    /requires points sorted by ascending x/
+  );
+  assert.doesNotThrow(() => lttb([{ x: 1, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }], 2));
 });
 
 // ---------------------------------------------------------------------------
@@ -228,4 +237,54 @@ test("samplingPlugin.install registers all samplers on Graph", () => {
     assert.ok(registered.has(name), `sampler '${name}' should be registered`);
     assert.equal(typeof registered.get(name), "function");
   }
+});
+
+test("Graph sampling filters to the viewport and passes sampler context", () => {
+  const previous = Graph.samplers.get("capture");
+  let captured = null;
+  const sampler = (points, maxPoints, context) => {
+    captured = { points, maxPoints, context };
+    return points.slice(0, maxPoints);
+  };
+  Graph.registerSampler("capture", sampler);
+
+  try {
+    const graph = {
+      options: {
+        sampling: { enabled: true, maxPoints: 5, method: "capture", viewport: true, pointsPerPixel: 1 }
+      }
+    };
+    const series = { points: Array.from({ length: 11 }, (_, x) => ({ x: x * 10, y: x })) };
+    const output = Graph.prototype._getRenderableSeries.call(graph, series, {
+      bounds: { xMin: 20, xMax: 80, yMin: 0, yMax: 10 },
+      layout: { left: 0, right: 10, width: 10, top: 0, bottom: 10, height: 10 },
+      xScale: () => 0,
+      yScale: () => 0
+    });
+
+    assert.deepEqual(captured.points.map((point) => point.x), [10, 20, 30, 40, 50, 60, 70, 80, 90]);
+    assert.equal(captured.maxPoints, 5);
+    assert.deepEqual(captured.context.visibleXRange, { xMin: 20, xMax: 80 });
+    assert.equal(output.points.length, 5);
+  } finally {
+    if (previous) Graph.registerSampler("capture", previous);
+    else Graph.unregisterSampler("capture");
+  }
+});
+
+test("samplingPlugin unregisters only after its last graph owner is removed", () => {
+  class TestGraph {
+    static samplers = new Map();
+    static registerSampler(name, fn) { this.samplers.set(name, fn); }
+    static unregisterSampler(name) { this.samplers.delete(name); }
+  }
+  const first = { constructor: TestGraph };
+  const second = { constructor: TestGraph };
+
+  samplingPlugin.install(first);
+  samplingPlugin.install(second);
+  samplingPlugin.hooks.beforeDestroy(first, {}, {}, {});
+  assert.equal(TestGraph.samplers.has("lttb"), true);
+  samplingPlugin.hooks.beforeDestroy(second, {}, {}, {});
+  assert.equal(TestGraph.samplers.has("lttb"), false);
 });

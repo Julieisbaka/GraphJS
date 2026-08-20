@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-sampling",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "First-party sampling extension for GraphJS. Registers LTTB, M4, RDP, LTD, LTOB, and SMA samplers.",
   "type": "module",
   "main": "./index.js",

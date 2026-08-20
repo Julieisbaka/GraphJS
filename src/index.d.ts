@@ -37,6 +37,17 @@ export type SamplingOptions = {
   enabled: boolean;
   maxPoints: number;
   method: string;
+  viewport: boolean;
+  pointsPerPixel: number;
+};
+
+export type SamplerContext = {
+  bounds?: DataBounds;
+  layout?: PlotLayout;
+  xScale?: (value: number) => number;
+  yScale?: (value: number) => number;
+  visibleXRange?: { xMin: number; xMax: number } | null;
+  target: number;
 };
 
 export type SortingOptions = {
@@ -305,7 +316,7 @@ export type SeriesDefaults = {
   pointRadius: number;
 };
 
-export type GraphSeriesSampler = (points: Point[], maxPoints: number) => Point[];
+export type GraphSeriesSampler = (points: Point[], maxPoints: number, context?: SamplerContext) => Point[];
 
 export class Registry {
   registerPlugin(plugin: GraphPlugin): void;

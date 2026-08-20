@@ -1,6 +1,6 @@
 {
   "name": "@julieisbaka/graphjs-extension-time-scale",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "First-party time scale labeling extension for GraphJS.",
   "type": "module",
   "main": "./index.js",

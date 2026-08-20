@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - 2026-08-20
+
+### Added
+
+- Added viewport-aware sampling context, pixel-based sampling targets, and sampling options for viewport filtering and points per pixel.
+- Added sorted-input validation support for order-dependent samplers.
+
 ## [0.6.1] - 2026-08-20
 
 ### Fixed

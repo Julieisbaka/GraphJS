@@ -21,6 +21,7 @@ Registers multiple downsampling methods into `Graph.samplers` for large-series r
 ## Install Behavior
 
 - On install, each sampler is registered globally through `graph.constructor.registerSampler(name, fn)`.
+- Registrations are reference-counted across graph instances and cleaned up on plugin removal.
 - No plugin commands are registered.
 
 ## Parameters and Outputs
@@ -29,6 +30,7 @@ Each sampler function uses:
 - Parameters:
   - `points: Array<{x:number,y:number}>`
   - `maxPoints: number`
+  - `context?: { bounds, layout, xScale, yScale, visibleXRange, target }`
 - Output:
   - Downsampled point array
 
@@ -58,6 +60,8 @@ From `extensions/sampling/common.js`:
   - `sma` for smoothing noise.
   - `rdp` for line simplification.
 - Pair sampler choice with domain-appropriate `maxPoints`.
+- Keep points sorted by ascending `x` for `lttb`, `m4`, `rdp`, `ltd`, and `ltob`; duplicate x-values are allowed.
+- Use `sampling.viewport` and `sampling.pointsPerPixel` to tune large interactive views.
 
 ## Internal Changes Over Time
 

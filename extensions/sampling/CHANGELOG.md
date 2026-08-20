@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.2] - 2026-08-20
+
+### Added
+
+- Added sorted-input validation for order-dependent samplers.
+- Added ownership-safe sampler cleanup when the plugin is removed.
+
 ## [0.0.1] - 2026-05-23
 
 ### Added

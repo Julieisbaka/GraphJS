@@ -74,6 +74,8 @@ export function validateGraphOptions(options) {
   assert(Number.isInteger(options.sampling.maxPoints) && options.sampling.maxPoints >= 2, "sampling.maxPoints: expected integer >= 2.");
   assert(typeof options.sampling.method === "string" && options.sampling.method.trim().length > 0, "sampling.method: expected non-empty string.");
   assert(options.sampling.method === options.sampling.method.trim(), "sampling.method: no surrounding whitespace.");
+  assert(typeof options.sampling.viewport === "boolean", "sampling.viewport: expected boolean.");
+  assert(typeof options.sampling.pointsPerPixel === "number" && Number.isFinite(options.sampling.pointsPerPixel) && options.sampling.pointsPerPixel > 0, "sampling.pointsPerPixel: expected positive number.");
 
   if (options.series != null) {
     assert(typeof options.series === "object" && !Array.isArray(options.series), "series: expected plain object.");

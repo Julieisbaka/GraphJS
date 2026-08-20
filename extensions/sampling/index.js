@@ -13,6 +13,14 @@ import { triangleArea, splitBuckets } from "./common.js";
 // Shared: triangleArea, splitBuckets
 // ---------------------------------------------------------------------------
 
+function assertSorted(points, name) {
+  for (let i = 1; i < points.length; i += 1) {
+    if (points[i].x < points[i - 1].x) {
+      throw new Error(`Sampler '${name}' requires points sorted by ascending x.`);
+    }
+  }
+}
+
 /**
  * Largest-Triangle-Three-Buckets downsampling.
  *
@@ -26,6 +34,7 @@ import { triangleArea, splitBuckets } from "./common.js";
  * @returns {{x:number,y:number}[]}
  */
 export function lttb(points, maxPoints) {
+  assertSorted(points, "lttb");
   if (maxPoints >= points.length || maxPoints < 3) return points.slice();
 
   const n = points.length;
@@ -76,6 +85,7 @@ export function lttb(points, maxPoints) {
  * @returns {{x:number,y:number}[]}
  */
 export function m4(points, maxPoints) {
+  assertSorted(points, "m4");
   if (maxPoints >= points.length || maxPoints < 4) return points.slice();
 
   const numBuckets = Math.max(1, Math.floor(maxPoints / 4));
@@ -180,6 +190,7 @@ function rdpWithEps(points, eps) {
  * @returns {{x:number,y:number}[]}
  */
 export function rdp(points, maxPoints) {
+  assertSorted(points, "rdp");
   if (maxPoints >= points.length || maxPoints < 2) return points.slice();
 
   // Upper bound for epsilon: max perpendicular distance from the baseline
@@ -227,6 +238,7 @@ export function rdp(points, maxPoints) {
  * @returns {{x:number,y:number}[]}
  */
 export function ltd(points, maxPoints) {
+  assertSorted(points, "ltd");
   if (maxPoints >= points.length || maxPoints < 3) return points.slice();
 
   const n = points.length;
@@ -283,6 +295,7 @@ export function ltd(points, maxPoints) {
  * @returns {{x:number,y:number}[]}
  */
 export function ltob(points, maxPoints) {
+  assertSorted(points, "ltob");
   if (maxPoints >= points.length || maxPoints < 3) return points.slice();
 
   const n = points.length;
@@ -351,6 +364,50 @@ export function sma(points, maxPoints) {
 // ---------------------------------------------------------------------------
 
 const SAMPLERS = { lttb, m4, rdp, ltd, ltob, sma };
+const SORTED_SAMPLERS = new Set(["lttb", "m4", "rdp", "ltd", "ltob"]);
+const registrations = new WeakMap();
+
+function registerSamplers(GraphClass, graph) {
+  let owned = registrations.get(GraphClass);
+  if (!owned) {
+    owned = new Map();
+    registrations.set(GraphClass, owned);
+  }
+
+  for (const [name, fn] of Object.entries(SAMPLERS)) {
+    let record = owned.get(name);
+    if (!record) {
+      record = {
+        fn,
+        previous: GraphClass.samplers?.get(name),
+        owners: new Set()
+      };
+      owned.set(name, record);
+      GraphClass.registerSampler(name, fn);
+    }
+    record.owners.add(graph);
+    if (SORTED_SAMPLERS.has(name)) {
+      fn.requiresSorted = true;
+    }
+  }
+}
+
+function unregisterSamplers(GraphClass, graph) {
+  const owned = registrations.get(GraphClass);
+  if (!owned) return;
+
+  for (const [name, record] of owned) {
+    record.owners.delete(graph);
+    if (record.owners.size > 0) continue;
+
+    if (GraphClass.samplers.get(name) === record.fn) {
+      if (record.previous) GraphClass.registerSampler(name, record.previous);
+      else GraphClass.unregisterSampler(name);
+    }
+    owned.delete(name);
+  }
+  if (owned.size === 0) registrations.delete(GraphClass);
+}
 
 /**
  * First-party sampling extension for GraphJS.
@@ -371,8 +428,11 @@ export const samplingPlugin = {
   id: "sampling",
   install(graph) {
     const GraphClass = graph.constructor;
-    for (const [name, fn] of Object.entries(SAMPLERS)) {
-      GraphClass.registerSampler(name, fn);
+    registerSamplers(GraphClass, graph);
+  },
+  hooks: {
+    beforeDestroy(graph) {
+      unregisterSamplers(graph.constructor, graph);
     }
   }
 };
