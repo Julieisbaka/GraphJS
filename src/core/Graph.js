@@ -486,17 +486,57 @@ export class Graph {
    * @param {import("../index.d.ts").Series} series - Series to inspect.
    * @returns {import("../index.d.ts").Series}
    */
-  _getRenderableSeries(series) {
+  _getRenderableSeries(series, renderContext = {}) {
     const sampling = this.options.sampling;
-    if (!sampling.enabled || !Array.isArray(series.points) || series.points.length <= sampling.maxPoints) {
+    if (!sampling.enabled || !Array.isArray(series.points)) {
       return series;
     }
 
     const sampler = Graph.samplers.get(sampling.method.trim());
-    if (sampler) {
-      return { ...series, points: sampler(series.points, sampling.maxPoints) };
+    if (!sampler) {
+      return series;
     }
-    return series;
+
+    let points = series.points;
+    const { bounds, layout } = renderContext;
+    if (sampling.viewport && bounds && Number.isFinite(bounds.xMin) && Number.isFinite(bounds.xMax)) {
+      const visible = [];
+      let left = null;
+      let right = null;
+      for (const point of points) {
+        if (point.x < bounds.xMin && (!left || point.x > left.x)) left = point;
+        if (point.x > bounds.xMax && (!right || point.x < right.x)) right = point;
+        if (point.x >= bounds.xMin && point.x <= bounds.xMax) visible.push(point);
+      }
+      if (left) visible.unshift(left);
+      if (right) visible.push(right);
+      points = visible;
+    }
+
+    const dpr = getDevicePixelRatio();
+    const pixelTarget = layout ? Math.ceil(layout.width * dpr * sampling.pointsPerPixel) : sampling.maxPoints;
+    const target = Math.max(2, Math.min(sampling.maxPoints, pixelTarget));
+    if (points.length <= target) {
+      return points === series.points ? series : { ...series, points };
+    }
+
+    if (sampler.requiresSorted && (typeof __DEV__ === "undefined" || __DEV__)) {
+      for (let i = 1; i < points.length; i += 1) {
+        if (points[i].x < points[i - 1].x) {
+          throw new Error(`Sampler '${sampling.method}' requires points sorted by ascending x.`);
+        }
+      }
+    }
+
+    const context = {
+      bounds,
+      layout,
+      xScale: renderContext.xScale,
+      yScale: renderContext.yScale,
+      visibleXRange: bounds ? { xMin: bounds.xMin, xMax: bounds.xMax } : null,
+      target
+    };
+    return { ...series, points: sampler(points, target, context) };
   }
 
   /**
@@ -618,7 +658,7 @@ export class Graph {
         continue;
       }
 
-      const renderSeries = this._getRenderableSeries(series);
+      const renderSeries = this._getRenderableSeries(series, { layout: plot, bounds, xScale, yScale });
 
       const seriesPayload = { series: renderSeries, layout: plot, bounds, xScale, yScale };
       if (this.plugins.call("beforeDrawSeries", seriesPayload) === false) {

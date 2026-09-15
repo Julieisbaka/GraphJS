@@ -78,8 +78,10 @@ Fix:
 
 ## First-party Plugin Specific Notes
 
-- Pan-Zoom: check pointer event listener setup and viewport state reset on data changes.
-- Tooltip Cursor: ensure `hitRadius` is reasonable for your pixel density.
+- Pan-Zoom: check pointer event listener setup, viewport state reset on data changes,
+	and whether `enabled`, `panEnabled`, or `tooltipEnabled` is disabling the feature.
+- Tooltip Cursor compatibility: ensure `hitRadius` is reasonable for your pixel density;
+	new installations should configure tooltip cursor through pan-zoom.
 - Time-Scale: custom formatter should never throw; wrap internals defensively.
 - Watermark: if watermark rendering fails, verify plugin implementation/version and validate hook context usage.
 

@@ -79,12 +79,14 @@
     },
     "sampling": {
       "type": "object",
-      "required": ["enabled", "maxPoints", "method"],
+      "required": ["enabled", "maxPoints", "method", "viewport", "pointsPerPixel"],
       "additionalProperties": false,
       "properties": {
         "enabled": { "type": "boolean", "default": false },
         "maxPoints": { "type": "integer", "minimum": 2, "default": 1200 },
-        "method": { "type": "string", "minLength": 1, "default": "stride" }
+        "method": { "type": "string", "minLength": 1, "default": "stride" },
+        "viewport": { "type": "boolean", "default": true },
+        "pointsPerPixel": { "type": "number", "exclusiveMinimum": 0, "default": 2 }
       }
     },
     "scalability": {

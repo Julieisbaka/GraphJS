@@ -7,16 +7,23 @@
 
 ## Description
 
-Renders formatted time labels across the x-axis and supports runtime config updates.
+Renders adaptive, timezone-aware time labels across the x-axis and supports runtime config updates.
+
+Automatic labels choose an appropriate date/time format from the visible range
+and suppress labels that would overlap. Use `timeZone: "UTC"` or an IANA timezone
+identifier for deterministic output.
 
 ## Default Options
 
 ```js
 {
   enabled: true,
-  ticks: 5,
+  ticks: "auto",
+  maxTicks: 12,
+  minLabelSpacing: 18,
   locale: "en-US",
-  dateTimeFormat: { month: "short", day: "2-digit" },
+  timeZone: undefined,
+  dateTimeFormat: null,
   color: "#475569",
   font: "11px Segoe UI, sans-serif",
   formatter: null,
@@ -30,12 +37,16 @@ Renders formatted time labels across the x-axis and supports runtime config upda
 
 ### `time-scale.set`
 
-- Description: Set tick count, locale, and enable state.
+- Description: Set tick density, locale, timezone, and enable state.
 - Parameters:
-  - `ticks?: number` (minimum 2)
+  - `ticks?: number | "auto"` (minimum 2 when numeric)
+  - `maxTicks?: number`
+  - `minLabelSpacing?: number`
   - `enabled?: boolean`
   - `locale?: string`
-- Output: `{ ticks, enabled, locale }`
+  - `timeZone?: string | null`
+  - `dateTimeFormat?: Intl.DateTimeFormatOptions`
+- Output: `{ ticks, maxTicks, minLabelSpacing, enabled, locale, timeZone }`
 - Added: Initial line (<= 0.2.4)
 - Deprecated: No
 - Removal: No
@@ -57,13 +68,14 @@ Renders formatted time labels across the x-axis and supports runtime config upda
 ## Best Practices
 
 - Keep formatter pure and exception-safe.
-- Match `ticks` to available plot width to prevent label overlap.
+- Prefer `ticks: "auto"` and tune `minLabelSpacing` for responsive layouts.
 
 ## Internal Changes Over Time
 
 Source: `extensions/time-scale/CHANGELOG.md`
 
+- `0.1.0` (2026-08-20): Added automatic density, timezone support, adaptive formatting, and overlap avoidance.
 - `0.0.3` (2026-04-15): `time-scale.set` switched from direct `graph.render()` to `api.requestRender()`.
 - `0.0.1` (2026-04-14): Initial runtime released with locale-aware x-axis time formatting and configurable formatter/ticks.
 
-Versions `0.0.4` and newer are package/publish metadata changes and do not alter runtime plugin logic.
+Versions `0.0.4` through `0.0.8` are package/publish metadata changes.

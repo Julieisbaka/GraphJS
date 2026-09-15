@@ -212,12 +212,6 @@ export class PluginHost {
 
     const incomingIds = new Set(parsedEntries.map((entry) => entry.id));
 
-    for (const existingPluginId of this.pluginStates.keys()) {
-      if (!incomingIds.has(existingPluginId)) {
-        this.graph.clearPluginCommands(existingPluginId);
-      }
-    }
-
     const seenIds = new Set();
     const normalized = parsedEntries
       .map((entry) => {
@@ -241,6 +235,19 @@ export class PluginHost {
         const options = deepMerge(plugin.defaults || {}, entry.options || {});
         return { plugin, options };
       });
+
+    // Plugins capture options and resources in install() closures. Tear down
+    // the current configuration before reinstalling it so reconfiguration
+    // cannot duplicate listeners or leave stale commands behind.
+    if (this.plugins.length > 0) {
+      this.call("beforeDestroy", {});
+    }
+    for (const { plugin } of this.plugins) {
+      this.graph.clearPluginCommands(plugin.id);
+      if (!incomingIds.has(plugin.id)) {
+        this.pluginStates.delete(plugin.id);
+      }
+    }
 
     this.plugins = normalized.some((r) => r.plugin.before?.length || r.plugin.after?.length)
       ? orderPlugins(normalized)
@@ -328,7 +335,7 @@ export class PluginHost {
         return host.graph.executeCommand(commandName, payload);
       },
       requestRender() {
-        host.graph.render();
+        host.graph.render({ force: true });
       },
       emit(hookName, context = {}) {
         if (hookName !== "onPluginEvent") {

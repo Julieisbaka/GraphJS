@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +22,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: npm install
@@ -36,7 +34,6 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const { execSync } = require('child_process');
-            const publishPackages = [];
 
             const packages = [
               {
@@ -105,18 +102,6 @@ jobs:
                 : afterHeader + nextSection;
 
               return changelogContent.slice(afterHeader, end).trim();
-            }
-
-            function hasPublishedVersion(name, version, cwd) {
-              try {
-                const out = execSync(
-                  `npm view "${name}@${version}" version --registry=https://registry.npmjs.org/`,
-                  { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
-                ).trim();
-                return out === version;
-              } catch {
-                return false;
-              }
             }
 
             // Determine which package.json files changed in this push.
@@ -229,121 +214,4 @@ jobs:
                 core.info(`Created release: ${tag} (${assetBaseName}.js + ${assetBaseName}.min.js)`);
               }
 
-              if (hasPublishedVersion(name, version, pkg.dir)) {
-                core.info(`npm package ${name}@${version} already exists — skipping npm publish.`);
-                continue;
-              }
-
-              publishPackages.push({
-                name,
-                version,
-                dir: pkg.dir,
-              });
             }
-
-            const publishFile = path.join(process.env.RUNNER_TEMP, 'graphjs-publish-packages.json');
-            fs.writeFileSync(publishFile, JSON.stringify(publishPackages, null, 2));
-            core.setOutput('publishFile', publishFile);
-
-      - name: Publish changed packages to npm
-        env:
-          PUBLISH_FILE: ${{ steps.release_metadata.outputs.publishFile }}
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const { execFileSync } = require('child_process');
-
-          function run(command, args, options = {}) {
-            return execFileSync(command, args, {
-              stdio: 'inherit',
-              encoding: 'utf8',
-              ...options,
-            });
-          }
-
-          function extractNpmLogPath(output) {
-            const text = typeof output === 'string' ? output : '';
-            const match = text.match(/A complete log of this run can be found in:\s*(.+)/i);
-            return match ? match[1].trim() : null;
-          }
-
-          function readNpmDebugLog(logPath) {
-            if (!logPath) {
-              return null;
-            }
-            try {
-              if (!fs.existsSync(logPath)) {
-                return null;
-              }
-              return fs.readFileSync(logPath, 'utf8');
-            } catch {
-              return null;
-            }
-          }
-
-          function publishPackage(pkg) {
-            try {
-              const stdout = execFileSync('npm', ['publish', '--provenance', '--access', 'public'], {
-                cwd: pkg.dir,
-                stdio: ['ignore', 'pipe', 'pipe'],
-                encoding: 'utf8',
-              });
-              if (stdout) {
-                process.stdout.write(stdout);
-              }
-              return;
-            } catch (error) {
-              const status = typeof error.status === 'number' ? error.status : 'unknown';
-              const stdout = typeof error.stdout === 'string' ? error.stdout : '';
-              const stderr = typeof error.stderr === 'string' ? error.stderr : '';
-              const combined = `${stdout}\n${stderr}`;
-              const logPath = extractNpmLogPath(combined);
-              const debugLog = readNpmDebugLog(logPath);
-
-              if (stdout) {
-                process.stdout.write(stdout);
-              }
-              if (stderr) {
-                process.stderr.write(stderr);
-              }
-
-              throw new Error(
-                [
-                  `npm publish failed for ${pkg.name}@${pkg.version} (status: ${status}).`,
-                  '',
-                  'Captured npm stderr excerpt:',
-                  stderr || '(none)',
-                  '',
-                  logPath ? `npm debug log path: ${logPath}` : 'npm debug log path: not detected',
-                  debugLog ? `--- npm debug log start ---\n${debugLog}\n--- npm debug log end ---` : 'npm debug log content: unavailable',
-                  '',
-                  'Common causes:',
-                  '- Publish was attempted without --access public (publishConfig.access alone may not control endpoint routing).',
-                  '- The package/scope is not yet bootstrapped on npm (manual first publish required).',
-                  '- Trusted Publishing is not attached to this repo/workflow in npm package settings.',
-                  '- The publishing identity does not have permission for this npm scope.',
-                ].join('\n')
-              );
-            }
-          }
-
-          const publishFile = process.env.PUBLISH_FILE;
-          if (!publishFile || !fs.existsSync(publishFile)) {
-            console.log('No publish file found; skipping npm publish.');
-            process.exit(0);
-          }
-
-          const packages = JSON.parse(fs.readFileSync(publishFile, 'utf8'));
-          if (!packages.length) {
-            console.log('No changed unpublished packages to publish.');
-            process.exit(0);
-          }
-
-          // Quick network/auth sanity check before iterating packages.
-          run('npm', ['ping']);
-
-          for (const pkg of packages) {
-            console.log(`Publishing ${pkg.name}@${pkg.version} from ${pkg.dir}`);
-            publishPackage(pkg);
-          }
-          NODE

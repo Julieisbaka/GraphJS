@@ -29,7 +29,9 @@ Schema file: `documentation/docs/reference/default-options.schema.json`
   sampling: {
     enabled: false,
     maxPoints: 1200,
-    method: "stride"
+    method: "stride",
+    viewport: true,
+    pointsPerPixel: 2
   },
   scalability: {
     dirtyRender: false,

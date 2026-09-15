@@ -1,6 +1,7 @@
 # @julieisbaka/graphjs-extension-tooltip-cursor
 
-First-party GraphJS extension that adds hover tooltips and cursor guide lines.
+Compatibility package for the tooltip and cursor behavior now included in
+`@julieisbaka/graphjs-extension-pan-zoom`.
 
 ## Install
 
@@ -26,3 +27,8 @@ const graph = new Graph("#graph", {
 - `pointRadius`, `hitRadius`
 - `tooltipBg`, `tooltipColor`, `tooltipFont`
 - `formatter({ series, point })`
+
+For new applications, prefer the pan-zoom package to combine panning, zooming,
+and tooltip cursor interactions. This package remains available so existing
+`tooltipCursorPlugin` imports and the `tooltip-cursor.set` command continue to
+work.

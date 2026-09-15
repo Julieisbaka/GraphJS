@@ -7,20 +7,35 @@
 
 ## Description
 
-Adds wheel zooming, drag panning, viewport state management, and runtime commands.
+Adds wheel zooming, drag panning, hover guides, nearest-point highlighting,
+tooltip rendering, viewport state management, and runtime commands.
 
 ## Default Options
 
 ```js
 {
   enabled: true,
+  panEnabled: true,
+  tooltipEnabled: true,
   zoomStep: 0.12,
   minZoomStep: 0.01,
   maxZoomStep: 0.8,
   minSpanX: 0.0001,
-  minSpanY: 0.0001
+  minSpanY: 0.0001,
+  guideColor: "rgba(15, 23, 42, 0.35)",
+  guideWidth: 1,
+  guideDash: [4, 4],
+  pointRadius: 4,
+  hitRadius: 24,
+  tooltipBg: "rgba(15, 23, 42, 0.92)",
+  tooltipColor: "#f8fafc",
+  tooltipFont: "12px Segoe UI, sans-serif",
+  formatter: ({ series, point }) => `${series.id}: (${point.x}, ${point.y})`
 }
 ```
+
+`enabled` is the master switch. `panEnabled` and `tooltipEnabled` can disable
+either interaction independently.
 
 ## Commands
 
@@ -38,7 +53,10 @@ Adds wheel zooming, drag panning, viewport state management, and runtime command
 - Description: Update plugin enable state and zoom step.
 - Parameters:
   - `enabled?: boolean`
+  - `panEnabled?: boolean`
+  - `tooltipEnabled?: boolean`
   - `zoomStep?: number`
+  - `hitRadius?: number`
 - Output: `{ enabled, zoomStep }`
 - Added: Initial line (<= 0.2.4)
 - Deprecated: No

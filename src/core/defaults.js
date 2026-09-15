@@ -21,7 +21,9 @@ export const DEFAULT_OPTIONS = freeze({
   sampling: {
     enabled: false,
     maxPoints: 1200,
-    method: "stride"
+    method: "stride",
+    viewport: true,
+    pointsPerPixel: 2
   },
   scalability: {
     dirtyRender: false,

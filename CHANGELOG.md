@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - 2026-08-20
+
+### Added
+
+- Added viewport-aware sampling context, pixel-based sampling targets, and sampling options for viewport filtering and points per pixel.
+- Added sorted-input validation support for order-dependent samplers.
+
+## [0.6.1] - 2026-08-20
+
+### Fixed
+
+- Safely tear down active plugins before reconfiguration to prevent duplicate listeners and stale plugin commands/state.
+- Make plugin `requestRender()` calls render immediately even when dirty rendering is enabled.
+- Updated publishing documentation to reflect that npm publishing is manual.
+
 ## [0.6.0] - 2026-07-04
 
 ### Added

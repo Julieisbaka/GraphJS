@@ -11,8 +11,8 @@ Current extensions:
 
 - `@julieisbaka/graphjs-extension-crosshair`
 - `@julieisbaka/graphjs-extension-legend`
-- `@julieisbaka/graphjs-extension-tooltip-cursor`
 - `@julieisbaka/graphjs-extension-pan-zoom`
+- `@julieisbaka/graphjs-extension-tooltip-cursor` (compatibility package)
 - `@julieisbaka/graphjs-extension-time-scale`
 - `@julieisbaka/graphjs-extension-watermark`
 
@@ -20,7 +20,7 @@ Example imports:
 
 - `@julieisbaka/graphjs-extension-crosshair`
 - `@julieisbaka/graphjs-extension-legend`
-- `@julieisbaka/graphjs-extension-tooltip-cursor`
 - `@julieisbaka/graphjs-extension-pan-zoom`
+- `@julieisbaka/graphjs-extension-tooltip-cursor` (compatibility package)
 - `@julieisbaka/graphjs-extension-time-scale`
 - `@julieisbaka/graphjs-extension-watermark`

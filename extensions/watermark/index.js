@@ -35,7 +35,7 @@ export const watermarkPlugin = {
     );
   },
   hooks: {
-    afterRender(graph, context, options) {
+    afterRender(graph, context, options, api) {
       if (!options.enabled) {
         return;
       }

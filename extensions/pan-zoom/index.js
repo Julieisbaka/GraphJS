@@ -63,20 +63,74 @@ function ensureView(state, bounds) {
 }
 
 /**
+ * Finds the nearest rendered data point to the mouse location.
+ *
+ * @param {import("@julieisbaka/graphjs").Graph} graph - Graph instance.
+ * @param {{left:number,top:number,right:number,bottom:number,width:number,height:number}} layout - Plot layout.
+ * @param {{xMin:number,xMax:number,yMin:number,yMax:number}} bounds - Current data bounds.
+ * @param {{x:number,y:number}} mouse - Mouse position in canvas space.
+ * @param {number} radius - Hit radius in pixels.
+ * @returns {{series:object,point:object,px:number,py:number}|null} Nearest point payload.
+ */
+function findNearestPoint(graph, layout, bounds, mouse, radius) {
+  const xRange = bounds.xMax - bounds.xMin;
+  const yRange = bounds.yMax - bounds.yMin;
+  if (xRange <= 0 || yRange <= 0) {
+    return null;
+  }
+
+  let best = null;
+  let bestDistSq = Number.POSITIVE_INFINITY;
+
+  for (const series of graph.data || []) {
+    if (!series.visible) {
+      continue;
+    }
+
+    for (const point of series.points || []) {
+      const px = layout.left + ((point.x - bounds.xMin) / xRange) * layout.width;
+      const py = layout.bottom - ((point.y - bounds.yMin) / yRange) * layout.height;
+      const dx = px - mouse.x;
+      const dy = py - mouse.y;
+      const distSq = dx * dx + dy * dy;
+
+      if (distSq < bestDistSq) {
+        bestDistSq = distSq;
+        best = { series, point, px, py };
+      }
+    }
+  }
+
+  return best && bestDistSq <= radius * radius ? best : null;
+}
+
+/**
  * First-party pan/zoom extension for GraphJS.
  *
- * Adds wheel zooming, drag panning, viewport state, and runtime commands
- * (`pan-zoom.set`, `pan-zoom.resetView`).
+ * Adds wheel zooming, drag panning, hover guides, nearest-point highlighting,
+ * tooltip rendering, viewport state, and runtime commands (`pan-zoom.set`,
+ * `pan-zoom.resetView`).
  */
 export const panZoomPlugin = {
   id: "pan-zoom",
   defaults: {
     enabled: true,
+    panEnabled: true,
+    tooltipEnabled: true,
     zoomStep: 0.12,
     minZoomStep: 0.01,
     maxZoomStep: 0.8,
     minSpanX: 0.0001,
-    minSpanY: 0.0001
+    minSpanY: 0.0001,
+    guideColor: "rgba(15, 23, 42, 0.35)",
+    guideWidth: 1,
+    guideDash: [4, 4],
+    pointRadius: 4,
+    hitRadius: 24,
+    tooltipBg: "rgba(15, 23, 42, 0.92)",
+    tooltipColor: "#f8fafc",
+    tooltipFont: "12px Segoe UI, sans-serif",
+    formatter: ({ series, point }) => `${series.id}: (${point.x}, ${point.y})`
   },
   install(graph, options, api) {
     const state = api.getPluginState() || {};
@@ -99,15 +153,37 @@ export const panZoomPlugin = {
             if (typeof payload.enabled === "boolean") {
               options.enabled = payload.enabled;
             }
+            if (typeof payload.panEnabled === "boolean") {
+              options.panEnabled = payload.panEnabled;
+            }
+            if (typeof payload.tooltipEnabled === "boolean") {
+              options.tooltipEnabled = payload.tooltipEnabled;
+            }
             if (Number.isFinite(payload.zoomStep)) {
               options.zoomStep = clamp(payload.zoomStep, options.minZoomStep, options.maxZoomStep);
             }
+            if (Number.isFinite(payload.hitRadius)) {
+              options.hitRadius = Math.max(1, payload.hitRadius);
+            }
             api.requestRender();
-            return { enabled: options.enabled, zoomStep: options.zoomStep };
+            const result = {
+              enabled: options.enabled,
+              zoomStep: options.zoomStep,
+            };
+            if (
+              typeof payload.panEnabled === "boolean" ||
+              typeof payload.tooltipEnabled === "boolean" ||
+              Number.isFinite(payload.hitRadius)
+            ) {
+              result.panEnabled = options.panEnabled;
+              result.tooltipEnabled = options.tooltipEnabled;
+              result.hitRadius = options.hitRadius;
+            }
+            return result;
           },
           {
-            description: "Set pan-zoom enabled and zoomStep",
-            argsExample: { enabled: true, zoomStep: 0.15 }
+            description: "Set pan-zoom and tooltip-cursor options",
+            argsExample: { enabled: true, panEnabled: true, tooltipEnabled: true, zoomStep: 0.15 }
           }
         );
 
@@ -115,8 +191,13 @@ export const panZoomPlugin = {
     state.layout = null;
     state.bounds = null;
 
+    const onTooltipLeave = () => {
+      api.setState({ mouse: null, active: false, nearest: null });
+      api.requestRender();
+    };
+
     const onWheel = (event) => {
-      if (!options.enabled || !state.layout || !state.view || !state.bounds) {
+      if (!options.enabled || options.panEnabled === false || !state.layout || !state.view || !state.bounds) {
         return;
       }
 
@@ -158,7 +239,7 @@ export const panZoomPlugin = {
     };
 
     const onDown = (event) => {
-      if (!options.enabled || event.button !== 0 || !state.layout) {
+      if (!options.enabled || options.panEnabled === false || event.button !== 0 || !state.layout) {
         return;
       }
 
@@ -184,7 +265,14 @@ export const panZoomPlugin = {
     };
 
     const onMove = (event) => {
-      if (!options.enabled || !state.pointerDown || !state.layout || !state.view || !state.lastMouse) {
+      if (options.enabled && options.tooltipEnabled !== false) {
+        api.setState({ mouse: getMousePosition(graph.canvas, event), active: true });
+        if (graph.data) {
+          api.requestRender();
+        }
+      }
+
+      if (!options.enabled || options.panEnabled === false || !state.pointerDown || !state.layout || !state.view || !state.lastMouse) {
         return;
       }
 
@@ -213,9 +301,10 @@ export const panZoomPlugin = {
     graph.canvas.addEventListener("wheel", onWheel, { passive: false });
     graph.canvas.addEventListener("mousedown", onDown);
     graph.canvas.addEventListener("mousemove", onMove);
+    graph.canvas.addEventListener("mouseleave", onTooltipLeave);
     window.addEventListener("mouseup", onUp);
 
-    api.setState({ ...state, onWheel, onDown, onMove, onUp });
+    api.setState({ ...state, onWheel, onDown, onMove, onUp, onTooltipLeave, mouse: null, active: false, nearest: null });
   },
   hooks: {
     afterLayout(graph, context, options, api) {
@@ -237,6 +326,64 @@ export const panZoomPlugin = {
       context.bounds.yMin = state.view.yMin;
       context.bounds.yMax = state.view.yMax;
     },
+    afterRender(graph, context, options, api) {
+      const state = api.getPluginState() || {};
+      if (!options.enabled || options.tooltipEnabled === false || !state.active || !state.mouse) {
+        return;
+      }
+
+      const { layout, bounds } = context;
+      const nearest = findNearestPoint(graph, layout, bounds, state.mouse, options.hitRadius);
+      api.setState({ nearest });
+      if (!nearest) {
+        return;
+      }
+
+      const ctx = graph.ctx;
+      const { px, py, series, point } = nearest;
+      ctx.save();
+      ctx.strokeStyle = options.guideColor;
+      ctx.lineWidth = options.guideWidth;
+      ctx.setLineDash(Array.isArray(options.guideDash) ? options.guideDash : []);
+
+      ctx.beginPath();
+      ctx.moveTo(px, layout.top);
+      ctx.lineTo(px, layout.bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(layout.left, py);
+      ctx.lineTo(layout.right, py);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      ctx.fillStyle = series.color || "#3b82f6";
+      ctx.beginPath();
+      ctx.arc(px, py, options.pointRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      let text = "tooltip";
+      try {
+        text = options.formatter({ series, point });
+      } catch {
+        text = `${series.id}: (${point.x}, ${point.y})`;
+      }
+      ctx.font = options.tooltipFont;
+      const textWidth = ctx.measureText(text).width;
+      const padX = 8;
+      const boxHeight = 24;
+      const boxWidth = textWidth + padX * 2;
+      let boxX = px + 10;
+      let boxY = py - boxHeight - 10;
+      if (boxX + boxWidth > layout.right) boxX = px - boxWidth - 10;
+      if (boxY < layout.top) boxY = py + 10;
+
+      ctx.fillStyle = options.tooltipBg;
+      ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+      ctx.fillStyle = options.tooltipColor;
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, boxX + padX, boxY + boxHeight / 2);
+      ctx.restore();
+    },
     beforeSetData(graph, context, options, api) {
       const state = api.getPluginState() || {};
       state.view = null;
@@ -252,6 +399,9 @@ export const panZoomPlugin = {
       }
       if (state.onMove) {
         graph.canvas.removeEventListener("mousemove", state.onMove);
+      }
+      if (state.onTooltipLeave) {
+        graph.canvas.removeEventListener("mouseleave", state.onTooltipLeave);
       }
       if (state.onUp) {
         window.removeEventListener("mouseup", state.onUp);

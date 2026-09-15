@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0] - 2026-08-20
+
+### Added
+
+- Added automatic tick density based on plot width and label spacing.
+- Added UTC and named timezone support, adaptive date/time formatting, and overlap-safe labels.
+
 ## [0.0.8] - 2026-04-25
 
 ### Fixed

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.10] - 2026-08-20
+
+### Changed
+
+- Documented the merged pan-zoom extension as the recommended package while preserving this package's public compatibility API.
+
 ## [0.0.9] - 2026-04-25
 
 ### Fixed

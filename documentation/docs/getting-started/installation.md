@@ -21,9 +21,12 @@ npm install @julieisbaka/graphjs-extension-legend
 npm install @julieisbaka/graphjs-extension-pan-zoom
 npm install @julieisbaka/graphjs-extension-sampling
 npm install @julieisbaka/graphjs-extension-time-scale
-npm install @julieisbaka/graphjs-extension-tooltip-cursor
 npm install @julieisbaka/graphjs-extension-watermark
 ```
+
+The pan-zoom package now includes tooltip cursor behavior. The standalone
+tooltip-cursor package remains available for existing applications that use
+its legacy plugin and command namespace.
 
 ## Verify Installation
 

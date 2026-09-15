@@ -46,16 +46,10 @@ npm install @julieisbaka/graphjs
 
 ## Publishing
 
-- The release workflow publishes changed packages from `main` using npm Trusted Publishing via `.github/workflows/release.yml`.
-- The workflow creates release metadata in a JavaScript step, then performs the actual `npm publish --provenance --access public` calls in a dedicated shell step so npm receives the standard GitHub Actions trusted publishing environment.
-- `--access public` must be explicit for scoped publishes. `publishConfig.access = "public"` is still recommended, but CLI routing can still fall back to private scoped endpoints without the explicit flag.
+- The release workflow creates GitHub releases and uploads built package assets when package metadata changes on `main`.
+- npm publishing is manual and is not performed by `.github/workflows/release.yml`.
 - Manual publish example: `npm publish --provenance --access public`
-- The root package metadata includes a `repository.url` that must exactly match `https://github.com/Julieisbaka/GraphJS`, so the manifest now uses that plain GitHub URL without a `git+` prefix or trailing `.git`.
-- For a brand-new package on npm, publish it manually once first so the package exists and you can attach npm's GitHub Actions trusted publisher configuration to it.
-- If npm rejects a publish attempt after the workflow has already built the tarball, bump the package version before retrying so the next release uses a fresh semver.
-- For retries where the prior version already exists or is no longer publishable, bump at least the patch version (for example `0.5.2` -> `0.5.3`) before rerunning release.
-- After each package is connected to the `julieisbaka/GraphJS` repository and `release.yml` workflow in npm, future version bumps can publish from GitHub Actions without an `NPM_TOKEN` secret.
-- When publish fails, the workflow now surfaces explicit troubleshooting guidance for scope bootstrap, trusted publisher setup, and npm permission issues.
+- `--access public` is recommended for scoped packages, and each package version must be unique before publishing.
 
 ## Quick Start
 
@@ -215,8 +209,12 @@ Renderer `type` keys are normalized with `trim()` during registration and unregi
 - `domain` (`{ xMin, xMax, yMin, yMax } | null`): override data-derived bounds
 - `series`: `{ type, color, lineWidth, pointRadius }` — per-graph series defaults applied when a series omits those fields
 - `sampling`: `{ enabled, maxPoints, method }` — `method` is the name of any registered sampler (built-in: `"stride"`)
+- `sorting`: `{ enabled }` — when enabled, points in each series are sorted by ascending `x` during `setData`
+- `autoResize` (boolean): observe the canvas parent element with `ResizeObserver` and automatically `resize()` + `render()` on container size changes
 - `scalability`: `{ dirtyRender, layerCaching, useOffscreenCanvas }`
 - `pluginErrorBoundary`: `{ enabled, onError }` — can be updated live via `graph.setOptions({ pluginErrorBoundary: ... })`
+
+Canvas instances are keyboard-focusable (`tabindex="0"`) and expose an ARIA label that updates as users navigate visible points with arrow keys.
 
 ## Utility exports
 
@@ -254,7 +252,7 @@ First-party extensions live at `extensions/` in this workspace and are published
 - `@julieisbaka/graphjs-extension-legend`
 - `@julieisbaka/graphjs-extension-pan-zoom`
 - `@julieisbaka/graphjs-extension-time-scale`
-- `@julieisbaka/graphjs-extension-tooltip-cursor`
+- `@julieisbaka/graphjs-extension-tooltip-cursor` (compatibility package; tooltip cursor is included in pan-zoom)
 - `@julieisbaka/graphjs-extension-watermark`
 - `@julieisbaka/graphjs-extension-sampling`
 
